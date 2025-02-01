@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sensor_devices",
+  "info": {
+    "singularName": "sensor-device",
+    "pluralName": "sensor-devices",
+    "displayName": "Sensor Device",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "device_id": {
+      "type": "uid",
+      "required": true,
+      "minLength": 1
+    },
+    "temperature": {
+      "type": "decimal",
+      "required": true
+    },
+    "heart_rate": {
+      "type": "integer",
+      "required": true
+    },
+    "blood_oxy": {
+      "type": "decimal",
+      "required": true
+    },
+    "patient_id": {
+      "type": "uid",
+      "required": true
+    }
+  }
+}
