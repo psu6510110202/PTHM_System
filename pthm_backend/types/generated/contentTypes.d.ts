@@ -369,6 +369,58 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPatientDataPatientData extends Struct.CollectionTypeSchema {
+  collectionName: 'patient_datas';
+  info: {
+    description: '';
+    displayName: 'Patient Data';
+    pluralName: 'patient-datas';
+    singularName: 'patient-data';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    address: Schema.Attribute.Text & Schema.Attribute.Required;
+    age: Schema.Attribute.Integer & Schema.Attribute.Required;
+    birth_date: Schema.Attribute.Date & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    first_name: Schema.Attribute.String & Schema.Attribute.Required;
+    gender: Schema.Attribute.Enumeration<['male', 'female', 'lgbtq']> &
+      Schema.Attribute.Required;
+    last_name: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::patient-data.patient-data'
+    > &
+      Schema.Attribute.Private;
+    patient_id: Schema.Attribute.UID &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 6;
+        minLength: 6;
+      }> &
+      Schema.Attribute.DefaultTo<'000000'>;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 10;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    room: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 5;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSensorDeviceSensorDevice
   extends Struct.CollectionTypeSchema {
   collectionName: 'sensor_devices';
@@ -379,17 +431,18 @@ export interface ApiSensorDeviceSensorDevice
     singularName: 'sensor-device';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     blood_oxy: Schema.Attribute.Decimal & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    device_id: Schema.Attribute.UID &
+    device_id: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.Unique &
       Schema.Attribute.SetMinMaxLength<{
-        minLength: 1;
+        maxLength: 6;
       }>;
     heart_rate: Schema.Attribute.Integer & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -398,7 +451,12 @@ export interface ApiSensorDeviceSensorDevice
       'api::sensor-device.sensor-device'
     > &
       Schema.Attribute.Private;
-    patient_id: Schema.Attribute.UID & Schema.Attribute.Required;
+    patient_id: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 6;
+      }>;
     publishedAt: Schema.Attribute.DateTime;
     temperature: Schema.Attribute.Decimal & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -916,6 +974,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::patient-data.patient-data': ApiPatientDataPatientData;
       'api::sensor-device.sensor-device': ApiSensorDeviceSensorDevice;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

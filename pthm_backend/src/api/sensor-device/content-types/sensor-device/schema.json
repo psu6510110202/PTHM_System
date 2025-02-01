@@ -8,15 +8,10 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
-    "device_id": {
-      "type": "uid",
-      "required": true,
-      "minLength": 1
-    },
     "temperature": {
       "type": "decimal",
       "required": true
@@ -30,8 +25,16 @@
       "required": true
     },
     "patient_id": {
-      "type": "uid",
-      "required": true
+      "type": "string",
+      "required": true,
+      "maxLength": 6,
+      "unique": true
+    },
+    "device_id": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 6
     }
   }
 }

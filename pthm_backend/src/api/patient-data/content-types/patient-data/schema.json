@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "patient_datas",
+  "info": {
+    "singularName": "patient-data",
+    "pluralName": "patient-datas",
+    "displayName": "Patient Data",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "patient_id": {
+      "type": "uid",
+      "required": true,
+      "maxLength": 6,
+      "minLength": 6,
+      "default": "000000"
+    },
+    "first_name": {
+      "type": "string",
+      "required": true
+    },
+    "last_name": {
+      "type": "string",
+      "required": true
+    },
+    "gender": {
+      "type": "enumeration",
+      "enum": [
+        "male",
+        "female",
+        "lgbtq"
+      ],
+      "required": true
+    },
+    "birth_date": {
+      "type": "date",
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "required": true,
+      "maxLength": 10
+    },
+    "address": {
+      "type": "text",
+      "required": true
+    },
+    "room": {
+      "type": "string",
+      "required": true,
+      "maxLength": 5
+    },
+    "age": {
+      "type": "integer",
+      "required": true
+    }
+  }
+}
