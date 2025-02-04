@@ -1,86 +1,105 @@
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Divider } from "@mui/material";
-import { Person, Search, Logout } from "@mui/icons-material";
+import { useState } from "react";
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Divider, IconButton } from "@mui/material";
+import { Person, Search, Logout, Menu } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import Avatar from '@mui/material/Avatar';
-import logo from '../../assets/logo-2.png';
-import { styled } from '@mui/material/styles';
-
+import Avatar from "@mui/material/Avatar";
+import logo from "../../assets/logo-2.png";
+import { styled, useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 export const Sidebar = () => {
+  const [open, setOpen] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect mobile screens
 
-  const Div = styled('div')(({ theme }) => ({
-    ...theme.typography.button,
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(1),
-  }));  
+  // Toggle Sidebar
+  const handleDrawerToggle = () => {
+    setOpen(!open);
+  };
 
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: 150,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: 150,
-          boxSizing: "border-box",
-          backgroundColor: "#f8f9fa", // Light gray background
-          color: "#000", // Text color
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 1,
-        },
-      }}
-    >
-      {/* Logo Section */}
-      <Box sx={{ width: "100%", paddingY: 2, display: "flex", justifyContent: "center" }}>
-        <img src={logo} alt="Logo" style={{ width: 140, height: 60 }} />
-      </Box>
+    <>
+      {/* Toggle Button for Mobile */}
+      {isMobile && (
+        <IconButton onClick={handleDrawerToggle} sx={{ position: "absolute", top: 10, left: 10 }}>
+          <Menu />
+        </IconButton>
+      )}
 
-      {/* Divider to separate logo and menu */}
-      <Divider sx={{ width: "80%" }} />
+      <Drawer
+        variant={isMobile ? "temporary" : "permanent"}
+        open={open}
+        onClose={handleDrawerToggle}
+        sx={{
+          width: open ? 150 : 50,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: open ? 150 : 50,
+            boxSizing: "border-box",
+            backgroundColor: "#f8f9fa",
+            color: "#000",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            paddingTop: 1,
+            transition: "width 0.3s ease",
+          },
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ width: "100%", paddingY: 2, display: "flex", justifyContent: "center" }}>
+          {open && <img src={logo} alt="Logo" style={{ width: 140, height: 60 }} />}
+        </Box>
 
-      {/* Menu Items */}
-      <List sx={{ width: "100%", paddingY: 1 }}>
-        <ListItem disablePadding>
-          <ListItemButton component={Link} to="/" sx={{ display: "flex", justifyContent: "flex-start", gap: 1 }}>
-            <ListItemIcon sx={{ color: "#007bff", minWidth: "30px" }}>
-              <Person />
-            </ListItemIcon>
-            <ListItemText primary="Patient" />
-          </ListItemButton>
-        </ListItem>
+        <Divider sx={{ width: "80%" }} />
 
-        <ListItem disablePadding>
-          <ListItemButton component={Link} to="/search" sx={{ display: "flex", justifyContent: "flex-start", gap: 1 }}>
-            <ListItemIcon sx={{ color: "#007bff", minWidth: "30px" }}>
-              <Search />
-            </ListItemIcon>
-            <ListItemText primary="Search" />
-          </ListItemButton>
-        </ListItem>
-      </List>
+        {/* Menu Items */}
+        <List sx={{ width: "100%", paddingY: 1 }}>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/" sx={{ display: "flex", justifyContent: open ? "flex-start" : "center" }}>
+              <ListItemIcon sx={{ color: "#007bff", minWidth: "30px" }}>
+                <Person />
+              </ListItemIcon>
+              {open && <ListItemText primary="Patient" />}
+            </ListItemButton>
+          </ListItem>
 
-      {/* Spacer to push Sign Out to the bottom */}
-      <Box sx={{ flexGrow: 1 }} />
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Avatar>U</Avatar>
-        <Div>{"Login as : "}</Div>
-        <span>Staff</span>
-      </div>
-      <Divider sx={{ width: "80%" }} />
-      
-      {/* Sign Out Section */}
-      <List sx={{ width: "100%" }}>
-        <ListItem disablePadding>
-          <ListItemButton component={Link} to="/signout" sx={{ display: "flex", justifyContent: "flex-start", gap: 1, color: "red" }}>
-            <ListItemIcon sx={{ color: "red", minWidth: "30px" }}>
-              <Logout />
-            </ListItemIcon>
-            <ListItemText primary="Sign Out" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Drawer>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/search" sx={{ display: "flex", justifyContent: open ? "flex-start" : "center" }}>
+              <ListItemIcon sx={{ color: "#007bff", minWidth: "30px" }}>
+                <Search />
+              </ListItemIcon>
+              {open && <ListItemText primary="Search" />}
+            </ListItemButton>
+          </ListItem>
+        </List>
+
+        {/* Spacer */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* Profile Section */}
+        {open && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Avatar>U</Avatar>
+            <Box sx={{ fontWeight: "bold", padding: 1 }}>Login as:</Box>
+            <span>Staff</span>
+          </div>
+        )}
+        
+        <Divider sx={{ width: "80%" }} />
+
+        {/* Sign Out */}
+        <List sx={{ width: "100%" }}>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} to="/signout" sx={{ display: "flex", justifyContent: open ? "flex-start" : "center", color: "red" }}>
+              <ListItemIcon sx={{ color: "red", minWidth: "30px" }}>
+                <Logout />
+              </ListItemIcon>
+              {open && <ListItemText primary="Sign Out" />}
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Drawer>
+    </>
   );
 };
