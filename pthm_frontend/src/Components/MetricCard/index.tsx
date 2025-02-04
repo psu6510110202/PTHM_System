@@ -21,7 +21,7 @@ const StyledCard = styled(Card)<{ bgcolor?: string }>(({ theme, bgcolor }) => ({
   height: 200,
 }));
 
-const IconWrapper = styled(Box)<{ bgcolor?: string }>(({ theme, bgcolor }) => ({
+const IconWrapper = styled(Box)<{ bgcolor?: string }>(({ bgcolor }) => ({
   width: 140,
   height: 140,
   display: "flex",
