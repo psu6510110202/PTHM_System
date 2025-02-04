@@ -4,7 +4,7 @@ import { Person, Search, Logout, Menu } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import logo from "../../assets/logo-2.png";
-import { styled, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 export const Sidebar = () => {
