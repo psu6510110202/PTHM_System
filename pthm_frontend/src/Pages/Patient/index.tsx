@@ -1,5 +1,5 @@
 import { LocalHospital, NotificationsActive, Warning, Shield } from "@mui/icons-material";
-import { MetricCard, PatientCard } from "../../Components";
+import { DashboardMetricCard, DashboardPatientCard } from "../../Components";
 import { Grid2, Box, Typography } from "@mui/material";
 
 export const Patient = () => {
@@ -119,14 +119,14 @@ export const Patient = () => {
 
             <Grid2 container spacing={8} justifyContent="center">
                 <Grid2>
-                    <MetricCard 
+                    <DashboardMetricCard 
                         icon={<LocalHospital sx={{ fontSize: 100 }} />} 
                         count={12} 
                         label="Total Patient" 
                     />
                 </Grid2>
                 <Grid2>
-                    <MetricCard 
+                    <DashboardMetricCard 
                         icon={<NotificationsActive sx={{ fontSize: 100 }} />} 
                         count={2} 
                         label="Critical Case" 
@@ -134,7 +134,7 @@ export const Patient = () => {
                     />
                 </Grid2>
                 <Grid2 >
-                    <MetricCard 
+                    <DashboardMetricCard 
                         icon={<Warning sx={{ fontSize: 100 }} />} 
                         count={1} 
                         label="Risk Case" 
@@ -142,7 +142,7 @@ export const Patient = () => {
                     />
                 </Grid2>
                 <Grid2>
-                    <MetricCard 
+                    <DashboardMetricCard 
                         icon={<Shield sx={{ fontSize: 100 }} />} 
                         count={9} 
                         label="Normal Case" 
@@ -183,7 +183,7 @@ export const Patient = () => {
                             lg: 3,   // One-fourth width on large screens
                         }}
                     >
-                        <PatientCard
+                        <DashboardPatientCard
                             patientId={patient.patientId}
                             name={patient.name}
                             age={patient.age}

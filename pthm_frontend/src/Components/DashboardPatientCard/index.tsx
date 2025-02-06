@@ -31,7 +31,7 @@ const StatusDot = styled(Box)<{ status: string }>(({ status }) => ({
   backgroundColor: status === "online" ? "green" : "red", // Green for online, red for offline
 }));
 
-export const PatientCard: React.FC<PatientCardProps> = ({
+export const DashboardPatientCard: React.FC<PatientCardProps> = ({
   status,
   icon,
   patientId,

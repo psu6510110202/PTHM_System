@@ -40,7 +40,7 @@ const CardContentWrapper = styled(CardContent)({
   alignItems: "flex-end",
 });
 
-export const MetricCard: React.FC<InfoCardProps> = ({ icon, count, label, bgcolor }) => {
+export const DashboardMetricCard: React.FC<InfoCardProps> = ({ icon, count, label, bgcolor }) => {
   return (
     <StyledCard bgcolor={bgcolor}>
         <IconWrapper bgcolor={bgcolor ? "#ffffff40" : undefined}>{icon}</IconWrapper>
