@@ -1,5 +1,6 @@
 import { Card, CardContent, Typography, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { Link } from "react-router-dom";
 
 interface PatientCardProps {
   status: string; // Status can toggle between "online" or "offline"
@@ -43,34 +44,36 @@ export const DashboardPatientCard: React.FC<PatientCardProps> = ({
 }) => {
   return (
     <StyledPatientCard borderColor={borderColor}>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
-          Patient ID: {patientId}
-        </Typography>
-        <Box display="flex" alignItems="center" gap={1}>
-          <StatusDot status={status} />
-          <Typography variant="subtitle2" fontWeight={600} color={status === "online" ? "green" : "red"}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+      <Link to={`/patients/${patientId}`} style={{ textDecoration: "none" }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
+              Patient ID: {patientId}
           </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <StatusDot status={status} />
+            <Typography variant="subtitle2" fontWeight={600} color={status === "online" ? "green" : "red"}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
-      <CardContent sx={{ padding: 0, marginTop: 1 }}>
-        <Typography variant="h6" fontWeight={700} gutterBottom>
-          {name}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Age: <Typography component="span" fontWeight={600}>{age}</Typography>
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Floor: <Typography component="span" fontWeight={600}>{floor}</Typography>
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Room: <Typography component="span" fontWeight={600}>{room}</Typography>
-        </Typography>
-      </CardContent>
-      <Box display="flex" justifyContent="flex-end" alignItems="center">
-        {icon}
-      </Box>
+        <CardContent sx={{ padding: 0, marginTop: 1 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            {name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Age: <Typography component="span" fontWeight={600}>{age}</Typography>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Floor: <Typography component="span" fontWeight={600}>{floor}</Typography>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Room: <Typography component="span" fontWeight={600}>{room}</Typography>
+          </Typography>
+        </CardContent>
+        <Box display="flex" justifyContent="flex-end" alignItems="center">
+          {icon}
+        </Box>
+      </Link>
     </StyledPatientCard>
   );
 };
