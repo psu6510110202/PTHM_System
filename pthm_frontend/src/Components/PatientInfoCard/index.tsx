@@ -25,10 +25,12 @@ const StyledPatientCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2, // Rounded corners
   padding: theme.spacing(3),
   boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.15)", // Smooth shadow
-  maxWidth: 450, // Card width
+  width: "100%", // Full width
+  maxWidth: 450, // Card max width
   background: "linear-gradient(135deg, #f8f9fb, #ffffff)", // Soft gradient background
   border: "1px solid #e0e0e0", // Light border
 }));
+
 
 export const PatientInfoCard: React.FC<PatientInfoProps> = ({
   patientId,

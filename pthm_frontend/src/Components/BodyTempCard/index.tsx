@@ -12,7 +12,8 @@ const StyledPatientCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2, // Rounded corners
   padding: theme.spacing(3),
   boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.1)", // Deeper shadow for emphasis
-  maxWidth: 450, // Card width
+  maxWidth: 375, // Card width
+  width: "100%", // Full width
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
@@ -33,7 +34,7 @@ export const BodyTempCard: React.FC<PatientCardProps> = ({
     <StyledPatientCard>
       <Stack spacing={0} alignItems="center">
         <Typography variant="h6" fontWeight={800} color="primary">
-          🌡️ Body Temperature (Celsius)
+          🌡️ Body Temperature
         </Typography>
 
         {/* Gauge Component with conditional color based on temperature */}

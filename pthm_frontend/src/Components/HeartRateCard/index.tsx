@@ -5,7 +5,7 @@ const StyledHeartRateCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2, // Rounded corners
   padding: theme.spacing(4), // Increase padding for a larger card
   boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.1)", // Shadow for emphasis
-  maxWidth: 450, // Increase card width for larger content
+  maxWidth:375, // Increase card width for larger content
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -16,7 +16,7 @@ const StyledHeartRateCard = styled(Card)(({ theme }) => ({
 export const HeartRateCard: React.FC<{ heartRate: number }> = ({ heartRate }) => {
   return (
     <StyledHeartRateCard>
-      <Stack spacing={6} alignItems="center"> {/* Increased spacing between elements */}
+      <Stack spacing={8} alignItems="center"> {/* Increased spacing between elements */}
         {/* Heart Rate Monitoring Title */}
         <Typography variant="h5" fontWeight={700} color="primary" >
           Heart Rate Monitoring
