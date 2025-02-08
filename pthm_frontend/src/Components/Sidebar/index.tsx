@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Divider, IconButton } from "@mui/material";
 import { Person, Search, Logout, Menu } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import logo from "../../assets/logo-2.png";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import toast from "react-hot-toast";
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect mobile screens
+  const navigate = useNavigate(); // ✅ Use navigate to redirect
 
   // Toggle Sidebar
   const handleDrawerToggle = () => {
     setOpen(!open);
+  };
+
+  // ✅ Fix: Handle Logout
+  const handleLogout = () => {
+    sessionStorage.removeItem("user"); // Clear session
+    toast.success("Sign Out Successful."); // Show toast
+    navigate("/signin"); // Redirect to SignIn
   };
 
   return (
@@ -88,14 +97,14 @@ export const Sidebar = () => {
         
         <Divider sx={{ width: "80%" }} />
 
-        {/* Sign Out */}
+        {/* ✅ Updated Logout Button */}
         <List sx={{ width: "100%" }}>
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="/signout" sx={{ display: "flex", justifyContent: open ? "flex-start" : "center", color: "red" }}>
+            <ListItemButton onClick={handleLogout} sx={{ display: "flex", justifyContent: open ? "flex-start" : "center", color: "red" }}>
               <ListItemIcon sx={{ color: "red", minWidth: "30px" }}>
                 <Logout />
               </ListItemIcon>
-              {open && <ListItemText primary="Sign Out" />}
+              {open && <ListItemText primary="Sign Out"/>}
             </ListItemButton>
           </ListItem>
         </List>
