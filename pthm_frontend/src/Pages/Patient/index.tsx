@@ -1,6 +1,6 @@
 import { Typography, Box } from "@mui/material";
 import { Grid2 } from "@mui/material"; // Ensure you import Grid2
-import { BodyTempCard, HeartRateCard, BloodOxygenCard, ECGCard, PatientInfoCard } from "../../Components";
+import { BodyTempCard, HeartRateCard, BloodOxygenCard, ECGCard, PatientInfoCard, RoomEnvCard } from "../../Components";
 import { useState, useEffect } from "react";
 
 export const Patient = () => {
@@ -61,17 +61,12 @@ export const Patient = () => {
               </Typography>
           </Box>
       </Box>
-      <Grid2 container spacing={3} justifyContent="center">
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <BodyTempCard temperature={36.2} minTemp={35} maxTemp={40} />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <HeartRateCard heartRate={140} />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <BloodOxygenCard bloodOxygen={98.67} />
-        </Grid2>
-      </Grid2>
+      <Box display="flex" justifyContent="center" gap={5} flexWrap="wrap">
+        <BodyTempCard temperature={36.2} minTemp={35} maxTemp={40} />
+        <HeartRateCard heartRate={140} />
+        <BloodOxygenCard bloodOxygen={98.67} />
+        <RoomEnvCard temperature={27.5} humidity={60} />
+      </Box>
       <Box sx={{ flexGrow: 1, mt: 4 }}>
         <Grid2 container spacing={4} justifyContent="center" alignItems="start">
           {/* ECG Card - Takes More Space */}
