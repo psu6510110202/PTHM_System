@@ -9,12 +9,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Passw0rd
       POSTGRES_DB: pthm_db
+    volumes:
+      - db_data:/var/lib/postgresql/data # Persistent volume for PostgreSQL data
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin4_container
     restart: always
     ports:
-      - "8888:80"
+      - "9000:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: root@domain.com
       PGADMIN_DEFAULT_PASSWORD: Passw0rd
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # Persistent volume for pgAdmin data
+
+volumes:
+  db_data:
+  pgadmin_data:
