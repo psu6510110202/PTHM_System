@@ -2,10 +2,10 @@ import { LocalHospital, NotificationsActive, Warning, Shield, Search } from "@mu
 import { DashboardMetricCard, DashboardPatientCard } from "../../Components";
 import { Grid2, Box, Typography, TextField, InputAdornment } from "@mui/material";
 import PatientDashboard from "../../Models/PatientDashboard";
-import SensorInfoModel from "../../Models/SensorInfoModel";
 import { useState, useEffect, useRef } from "react";
 import Repo from "../../Repositories";
 import { userData } from "../../Helper";
+import SensorInfoModel from "../../Models/SensorInfoModel";
 
 type RiskCount = {
     Normal: number;
