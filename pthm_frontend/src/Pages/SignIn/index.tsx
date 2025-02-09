@@ -158,7 +158,7 @@ export const SignIn = () => {
             </FormControl>
 
             <Typography sx={{ fontSize: '14px', textAlign: 'right', color: 'gray' }}>
-              Forgot password? <a href="/recovery" style={{ color: 'blue', textDecoration: 'underline' }}>Click here</a>
+              Forgot password? Please contact the administrator.
             </Typography>
 
             <Button
