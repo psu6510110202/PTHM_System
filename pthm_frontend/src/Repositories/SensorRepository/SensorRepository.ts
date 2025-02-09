@@ -1,11 +1,11 @@
 import { IRepository } from "../IRepository";
-import SensorDashboard from "../../Models/SensorDashboard";
+import SensorInfoModel from "../../Models/SensorInfoModel";
 import conf from "../../conf";
 
-export class SensorRepository implements IRepository<SensorDashboard> {
+export class SensorRepository implements IRepository<SensorInfoModel> {
     urlPrefix = `${conf.apiPrefix}/api/sensor-devices`;
     
-    async getAll(token: string): Promise<SensorDashboard[] | null> {
+    async getAll(token: string): Promise<SensorInfoModel[] | null> {
         try {
             const response = await fetch(this.urlPrefix, {
                 method: "GET", // Changed to GET (if the API requires POST, add a body)

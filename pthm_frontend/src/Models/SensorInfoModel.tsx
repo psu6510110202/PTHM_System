@@ -1,4 +1,4 @@
-export default interface SensorDashboard {
+export default interface SensorInfoModel {
     patient_id: string;
     heart_rate: number;
     blood_oxy: number;

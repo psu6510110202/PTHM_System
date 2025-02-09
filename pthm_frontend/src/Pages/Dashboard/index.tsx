@@ -2,7 +2,7 @@ import { LocalHospital, NotificationsActive, Warning, Shield, Search } from "@mu
 import { DashboardMetricCard, DashboardPatientCard } from "../../Components";
 import { Grid2, Box, Typography, TextField, InputAdornment } from "@mui/material";
 import PatientDashboard from "../../Models/PatientDashboard";
-import SensorDashboard from "../../Models/SensorDashboard";
+import SensorInfoModel from "../../Models/SensorInfoModel";
 import { useState, useEffect, useRef } from "react";
 import Repo from "../../Repositories";
 import { userData } from "../../Helper";
@@ -21,7 +21,7 @@ type PatientWithRisk = PatientDashboard & {
 
 export const Dashboard = () => {
     const [patients, setPatients] = useState<PatientDashboard[]>([]);
-    const [sensors, setSensors] = useState<SensorDashboard[]>([]);
+    const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const user = userData();
 
