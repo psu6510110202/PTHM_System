@@ -1,9 +1,9 @@
-import { PatientDashboardRepository, PatientSeachRepository } from "./PatientRepository/PatientRepository";
+import { PatientDashboardRepository, PatientInfoRepository } from "./PatientRepository/PatientRepository";
 import { SensorRepository } from "./SensorRepository/SensorRepository";
 
 const repositories = {
     PatientDashboardRepository: new PatientDashboardRepository(),
-    PatientSeachRepository : new PatientSeachRepository(),
+    PatientInfoRepository : new PatientInfoRepository(),
     SensorRepository: new SensorRepository()
 }
 

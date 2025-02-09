@@ -14,7 +14,7 @@ export const PatientSearch = () => {
 
   const fetchPatients = async () => {
       try {
-          const response = await Repo.PatientSeachRepository.getAll(user.jwt);
+          const response = await Repo.PatientInfoRepository.getAll(user.jwt);
           if(response){
               setPatients(response);
           }

@@ -30,7 +30,7 @@ export class PatientDashboardRepository implements IRepository<PatientDashboard>
     }
 }
 
-export class PatientSeachRepository implements IRepository<PatientInfoModel> {
+export class PatientInfoRepository implements IRepository<PatientInfoModel> {
     urlPrefix = `${conf.apiPrefix}/api/patient-datas`;
     
     async getAll(token: string): Promise<PatientInfoModel[] | null> {
