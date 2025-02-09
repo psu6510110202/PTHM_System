@@ -1,4 +1,4 @@
-export default interface PatientSearchModel {
+export default interface PatientInfoModel {
     patient_id: string;
     first_name: string;
     last_name: string;

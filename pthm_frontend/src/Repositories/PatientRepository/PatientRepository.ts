@@ -1,7 +1,7 @@
 import { IRepository } from "../IRepository";
 import PatientDashboard from "../../Models/PatientDashboard";
 import conf from "../../conf";
-import PatientSearchModel from "../../Models/PatientSeachModel";
+import PatientInfoModel from "../../Models/PatientInfoModel";
 
 export class PatientDashboardRepository implements IRepository<PatientDashboard> {
     urlPrefix = `${conf.apiPrefix}/api/patient-datas`;
@@ -30,10 +30,10 @@ export class PatientDashboardRepository implements IRepository<PatientDashboard>
     }
 }
 
-export class PatientSeachRepository implements IRepository<PatientSearchModel> {
+export class PatientSeachRepository implements IRepository<PatientInfoModel> {
     urlPrefix = `${conf.apiPrefix}/api/patient-datas`;
     
-    async getAll(token: string): Promise<PatientSearchModel[] | null> {
+    async getAll(token: string): Promise<PatientInfoModel[] | null> {
         try {
             const response = await fetch(this.urlPrefix, {
                 method: "GET", // Changed to GET (if the API requires POST, add a body)

@@ -8,7 +8,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import PatientSearchModel from "../../Models/PatientSeachModel";
+import PatientInfoModel from "../../Models/PatientInfoModel";
 
 const StyledPatientCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2, // Rounded corners
@@ -21,7 +21,7 @@ const StyledPatientCard = styled(Card)(({ theme }) => ({
 }));
 
 
-export const PatientInfoCard: React.FC<PatientSearchModel> = ({
+export const PatientInfoCard: React.FC<PatientInfoModel> = ({
   patient_id,
   first_name,
   last_name,

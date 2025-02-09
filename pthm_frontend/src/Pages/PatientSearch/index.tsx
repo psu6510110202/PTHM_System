@@ -3,12 +3,12 @@ import { Box, TextField, InputAdornment, Typography } from "@mui/material";
 import {Grid2} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { PatientInfoCard } from "../../Components";
-import PatientSearchModel from "../../Models/PatientSeachModel";
+import PatientInfoModel from "../../Models/PatientInfoModel";
 import { userData } from "../../Helper";
 import Repo from "../../Repositories";
 
 export const PatientSearch = () => {
-  const [patients, setPatients] = useState<PatientSearchModel[]>([]);
+  const [patients, setPatients] = useState<PatientInfoModel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const user = userData();
 
