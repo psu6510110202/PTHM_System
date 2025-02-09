@@ -88,7 +88,7 @@ export const Dashboard = () => {
         // Critical conditions (life-threatening)
         if (
             (heart_rate < 40 || heart_rate > 120) || // Critical HR thresholds
-            (body_temp < 35.5 || body_temp > 38.5) || // Critical body temperature
+            (body_temp < 28 || body_temp > 40) || // Critical body temperature
             (room_temp < 10 || room_temp > 35) || // Extreme room temperature
             (room_humidity < 20 || room_humidity > 75) || // Extreme humidity
             (blood_oxy < 90) // 🚨 Critical blood oxygen level
@@ -98,7 +98,7 @@ export const Dashboard = () => {
         // Risk conditions (borderline abnormal)
         else if (
             ((heart_rate < 50 && heart_rate >= 40) || (heart_rate > 100 && heart_rate <= 120)) || // Risk HR range
-            ((body_temp < 36.1 && body_temp >= 35.5) || (body_temp > 37.5 && body_temp <= 38.5)) || // Risk temp range
+            ((body_temp < 35 && body_temp >= 28) || (body_temp > 37.5 && body_temp <= 40)) || // Risk temp range
             ((room_temp < 18 && room_temp >= 10) || (room_temp > 30 && room_temp <= 35)) || // Risk room temp
             ((room_humidity < 30 && room_humidity >= 20) || (room_humidity > 60 && room_humidity <= 75)) || // Risk humidity
             (blood_oxy >= 90 && blood_oxy < 95) // ⚠️ Risky blood oxygen level
