@@ -1,45 +1,50 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Box, TextField, InputAdornment, Typography } from "@mui/material";
 import {Grid2} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { PatientInfoCard } from "../../Components";
-
-// Sample patient data
-const patients = [
-  {
-    patientId: "xxxxx1",
-    name: "Mr. John ABC",
-    age: 59,
-    gender: "Male",
-    phone: "xxx-xxx-xxxx",
-    email: "john.abc@gmail.com",
-    address: "14/29 Gp 7 Phetkasem Nong Klang Ploo Nong Khaem",
-    doctor: "Dr. Smith ABC",
-    room: "4405",
-  },
-  {
-    patientId: "xxxxx2",
-    name: "Ms. Jane Doe",
-    age: 45,
-    gender: "Female",
-    phone: "xxx-xxx-xxxx",
-    email: "jane.doe@email.com",
-    address: "22/5 Bang Kapi Road",
-    doctor: "Dr. Wilson",
-    room: "2301",
-  },
-  // Add more sample data...
-];
+import PatientSearchModel from "../../Models/PatientSeachModel";
+import { userData } from "../../Helper";
+import Repo from "../../Repositories";
 
 export const PatientSearch = () => {
+  const [patients, setPatients] = useState<PatientSearchModel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const user = userData();
+
+  const fetchPatients = async () => {
+      try {
+          const response = await Repo.PatientSeachRepository.getAll(user.jwt);
+          if(response){
+              setPatients(response);
+          }
+      } catch (error) {
+          console.error("Error fetching patients:", error);
+          setPatients([]); // Set to empty array on failure
+      }
+  };
+
+  const intervalRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+      fetchPatients();
+
+      intervalRef.current = setInterval(() => {
+          fetchPatients();
+      }, 3000);
+
+      return () => {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+  }, []);
 
   // Filter patients based on name or room number
-  const filteredPatients = patients.filter(
-    (patient) =>
-      patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      patient.room.includes(searchQuery)
-  );
+  const filteredPatients = patients.filter(patient => 
+    patient.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    patient.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    patient.room.toString().includes(searchQuery) ||
+    patient.patient_id.toString().includes(searchQuery)
+);
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4}>
@@ -50,7 +55,7 @@ export const PatientSearch = () => {
       {/* Search Input Field */}
       <TextField
         variant="outlined"
-        placeholder="Search by name or room"
+        placeholder="Search by Name, Room or ID"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         sx={{
@@ -73,7 +78,7 @@ export const PatientSearch = () => {
         {filteredPatients.length > 0 ? (
           <Grid2 container spacing={3} justifyContent="center">
             {filteredPatients.map((patient) => (
-              <Grid2 size={{xs:12, sm:6, md:4}} key={patient.patientId} display="flex" justifyContent="center" maxWidth={450}>
+              <Grid2 size={{xs:12, sm:6, md:4}} key={patient.patient_id} display="flex" justifyContent="center" maxWidth={450}>
                 <PatientInfoCard {...patient}/>
               </Grid2>
             ))}
