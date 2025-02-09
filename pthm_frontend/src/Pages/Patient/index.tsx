@@ -1,10 +1,61 @@
 import { Typography, Box } from "@mui/material";
 import { Grid2 } from "@mui/material"; // Ensure you import Grid2
 import { BodyTempCard, HeartRateCard, BloodOxygenCard, ECGCard, PatientInfoCard, RoomEnvCard } from "../../Components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import PatientInfoModel from "../../Models/PatientInfoModel";
+import SensorInfoModel from "../../Models/SensorInfoModel";
+import Repo from "../../Repositories";
+import { userData } from "../../Helper";
+
 
 export const Patient = () => {
   const [ecgData, setEcgData] = useState<number[]>([]);
+  const [patients, setPatients] = useState<PatientInfoModel[]>([]);
+  const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
+  const location = useLocation();
+  const patientId = location.state?.patientId; // Retrieve the patient ID from state
+  const user = userData();
+  
+  const fetchPatients = async () => {
+    try {
+        const response = await Repo.PatientInfoRepository.getById(patientId ,user.jwt);
+        if(response){
+            setPatients([response]);
+        }
+    } catch (error) {
+        console.error("Error fetching patients:", error);
+        setPatients([]); // Set to empty array on failure
+    }
+  };
+
+  const fetchSensors = async () => {
+    try {
+        const response = await Repo.SensorRepository.getByPatientId(patientId ,user.jwt);
+        if(response){
+            setSensors([response]);
+        }
+    } catch (error) {
+        console.error("Error fetching patients:", error);
+        setPatients([]); // Set to empty array on failure
+    }
+  };
+
+
+  const intervalRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+      fetchPatients();
+      fetchSensors();
+      intervalRef.current = setInterval(() => {
+          fetchPatients();
+          fetchSensors();
+      }, 3000);
+
+      return () => {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+  }, []);
 
   const generateECGWaveform = (t: number) => {
     const heartRate = 1.2; // Simulate a heart rate factor (affects frequency of the wave)
@@ -40,7 +91,6 @@ export const Patient = () => {
   
     return () => clearInterval(interval);
   }, []);
-  
 
   return (
     <Box sx={{ p: 4 }}>
@@ -57,15 +107,15 @@ export const Patient = () => {
               }}
           >
               <Typography variant="h4" fontWeight="bold">
-                  Monitoring on Patient ID : 000001
+                  Monitoring on Patient ID : {patientId}
               </Typography>
           </Box>
       </Box>
       <Box display="flex" justifyContent="center" gap={5} flexWrap="wrap">
-        <BodyTempCard temperature={36.2} minTemp={35} maxTemp={40} />
-        <HeartRateCard heartRate={140} />
-        <BloodOxygenCard bloodOxygen={98.67} />
-        <RoomEnvCard temperature={27.5} humidity={60} />
+        <BodyTempCard temperature={sensors[0]?.body_temp} minTemp={28} maxTemp={45} />
+        <HeartRateCard heartRate={sensors[0]?.heart_rate} />
+        <BloodOxygenCard bloodOxygen={sensors[0]?.blood_oxy} />
+        <RoomEnvCard temperature={sensors[0]?.room_temp} humidity={sensors[0]?.room_humidity} />
       </Box>
       <Box sx={{ flexGrow: 1, mt: 4 }}>
         <Grid2 container spacing={4} justifyContent="center" alignItems="start">
@@ -77,15 +127,16 @@ export const Patient = () => {
           {/* Patient Info Card - Takes Less Space */}
           <Grid2 size={{xs:12, md:4}}>
             <PatientInfoCard
-              patientId="xxxxx1"
-              name="Mr. John ABC"
-              age={59}
-              gender="Male"
-              phone="xxx-xxx-xxxx"
-              email="john.abc@gmail.com"
-              address="14/29 Gp 7 Phetkasem Nong Klang Ploo Nong Khaem"
-              doctor="Dr. Smith ABC"
-              room="4405"
+              patient_id={patients[0]?.patient_id}
+              first_name={patients[0]?.first_name}
+              last_name={patients[0]?.last_name}
+              age={patients[0]?.age}
+              gender={patients[0]?.gender}
+              family_phone={patients[0]?.family_phone}
+              family_email={patients[0]?.family_email}
+              address={patients[0]?.address}
+              doctor_name={patients[0]?.doctor_name}
+              room={patients[0]?.room}
             />
           </Grid2>
         </Grid2>

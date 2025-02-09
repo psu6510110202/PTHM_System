@@ -17,7 +17,7 @@ function Layout() {
       <Box sx={{ flexGrow: 1, padding: 3 }}> 
         <Routes>
           <Route index element={<ProtectRoute><Dashboard /></ProtectRoute>} />
-          <Route path="/patients/:id" element={<ProtectRoute><Patient /></ProtectRoute>} />
+          <Route path="/patients/dashboard" element={<ProtectRoute><Patient /></ProtectRoute>} />
           <Route path="/search" element={<ProtectRoute><PatientSearch /></ProtectRoute>} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="*" element={<h1>Not Found</h1>} />
