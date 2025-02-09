@@ -7,12 +7,15 @@ import logo from "../../assets/logo-2.png";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import toast from "react-hot-toast";
+import { userData } from "../../Helper";
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect mobile screens
   const navigate = useNavigate(); // ✅ Use navigate to redirect
+  const user = userData(); // Get user data from session
+  
 
   // Toggle Sidebar
   const handleDrawerToggle = () => {
@@ -89,9 +92,9 @@ export const Sidebar = () => {
         {/* Profile Section */}
         {open && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <Avatar>U</Avatar>
+            <Avatar>{user.username ? user.username[0] : "S"}</Avatar>
             <Box sx={{ fontWeight: "bold", padding: 1 }}>Login as:</Box>
-            <span>Staff</span>
+            <span>{user.username ? user.username : "Staff"}</span>
           </div>
         )}
         

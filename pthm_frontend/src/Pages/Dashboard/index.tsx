@@ -22,11 +22,11 @@ type PatientWithRisk = PatientDashboard & {
 export const Dashboard = () => {
     const [patients, setPatients] = useState<PatientDashboard[]>([]);
     const [sensors, setSensors] = useState<SensorDashboard[]>([]);
-    const token = userData().jwt;
+    const user = userData();
 
     const fetchPatients = async () => {
         try {
-            const response = await Repo.PatientRepository.getAll(token);
+            const response = await Repo.PatientRepository.getAll(user.jwt);
             if(response){
                 setPatients(response);
             }
@@ -38,7 +38,7 @@ export const Dashboard = () => {
 
     const fetchSensors = async () => {
         try {
-            const response = await Repo.SensorRepository.getAll(token);
+            const response = await Repo.SensorRepository.getAll(user.jwt);
             if(response){
                 setSensors(response);
                 console
@@ -190,7 +190,7 @@ export const Dashboard = () => {
                     }}
                 >
                     <Typography variant="h5" fontWeight="bold">
-                        Welcome Staff to PTHM System
+                        Welcome {user.username} to PTHM System
                     </Typography>
                 </Box>
             </Box>
