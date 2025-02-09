@@ -8,18 +8,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-
-interface PatientInfoProps {
-  patientId: string;
-  name: string;
-  age: number;
-  gender: string;
-  phone: string;
-  email: string;
-  address: string;
-  doctor: string;
-  room: string;
-}
+import PatientSearchModel from "../../Models/PatientSeachModel";
 
 const StyledPatientCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2, // Rounded corners
@@ -32,15 +21,16 @@ const StyledPatientCard = styled(Card)(({ theme }) => ({
 }));
 
 
-export const PatientInfoCard: React.FC<PatientInfoProps> = ({
-  patientId,
-  name,
+export const PatientInfoCard: React.FC<PatientSearchModel> = ({
+  patient_id,
+  first_name,
+  last_name,
   age,
   gender,
-  phone,
-  email,
+  family_phone,
+  family_email,
   address,
-  doctor,
+  doctor_name,
   room,
 }) => {
   return (
@@ -52,11 +42,11 @@ export const PatientInfoCard: React.FC<PatientInfoProps> = ({
         <Divider />
         <Stack direction="row" alignItems="center" spacing={1}>
           <PersonIcon color="primary" />
-          <Typography variant="body1"><b>Patient ID:</b> {patientId}</Typography>
+          <Typography variant="body1"><b>Patient ID:</b> {patient_id}</Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <PersonIcon color="primary" />
-          <Typography variant="body1"><b>Name:</b> {name}</Typography>
+          <Typography variant="body1"><b>Name:</b>{gender === "male" ? "Mr." : "Mrs."} {first_name} {last_name}</Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <CalendarTodayIcon color="primary" />
@@ -68,11 +58,11 @@ export const PatientInfoCard: React.FC<PatientInfoProps> = ({
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <PhoneIcon color="primary" />
-          <Typography variant="body1"><b>Phone:</b> {phone}</Typography>
+          <Typography variant="body1"><b>Phone:</b> {family_phone}</Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <EmailIcon color="primary" />
-          <Typography variant="body1"><b>Email:</b> {email}</Typography>
+          <Typography variant="body1"><b>Email:</b> {family_email}</Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <HomeIcon color="primary" />
@@ -80,7 +70,7 @@ export const PatientInfoCard: React.FC<PatientInfoProps> = ({
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <LocalHospitalIcon color="primary" />
-          <Typography variant="body1"><b>Doctor:</b> {doctor}</Typography>
+          <Typography variant="body1"><b>Doctor:</b> {doctor_name}</Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1}>
           <MeetingRoomIcon color="primary" />
