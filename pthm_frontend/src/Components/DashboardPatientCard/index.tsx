@@ -71,7 +71,13 @@ export const DashboardPatientCard: React.FC<PatientCardProps> = ({
   }
   return (
     <StyledPatientCard borderColor={getBorderColor(risk)}>
-      <Link to={`/patients/${patient_id}`} style={{ textDecoration: "none" }}>
+      <Link 
+        to={{
+            pathname: "/patients/dashboard",  // Redirect to a generic details page
+        }} 
+        state={{ patientId: patient_id }} // Pass the patient ID in state
+        style={{ textDecoration: "none" }}
+      >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
               Patient ID: {patient_id}
