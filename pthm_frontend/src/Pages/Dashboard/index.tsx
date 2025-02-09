@@ -121,44 +121,45 @@ export const Dashboard = () => {
     const getUpdatedPatients = (): PatientWithRisk[] => {
         if (!Array.isArray(filteredPatients) || filteredPatients.length === 0) return []; // Ensure it's an array
     
-        return filteredPatients.map(patient => {
-            const sensorData = sensors.find(sensor => sensor.patient_id === patient.patient_id);
+        return filteredPatients
+            .filter(patient => sensors.some(sensor => sensor.patient_id === patient.patient_id)) // ✅ Filter out unmatched patients
+            .map(patient => {
+                const sensorData = sensors.find(sensor => sensor.patient_id === patient.patient_id);
     
-            if (!sensorData) {
+                if (!sensorData) {
+                    return {
+                        ...patient,
+                        risk: "Unknown",
+                        status: "offline"
+                    };
+                }
+    
+                const updatedAtTime = new Date(sensorData.updatedAt).getTime();
+                const currentTime = new Date().getTime();
+                const timeDifferenceMinutes = (currentTime - updatedAtTime) / 60000;
+    
+                const isOffline = timeDifferenceMinutes > 2;
+    
+                const riskLevel = categorizeCase(
+                    sensorData.heart_rate,
+                    sensorData.body_temp,
+                    sensorData.room_temp,
+                    sensorData.room_humidity,
+                    sensorData.blood_oxy,
+                    new Date(sensorData.updatedAt).toISOString()
+                );
+    
                 return {
                     ...patient,
-                    risk: "Unknown",
-                    status: "offline"
+                    risk: riskLevel,
+                    status: isOffline ? "offline" : "online"
                 };
-            }
-    
-            const updatedAtTime = new Date(sensorData.updatedAt).getTime(); // ✅ Convert string to Date
-            const currentTime = new Date().getTime();
-            const timeDifferenceMinutes = (currentTime - updatedAtTime) / 60000;
-    
-            const isOffline = timeDifferenceMinutes > 2;
-            
-            const riskLevel = categorizeCase(
-                sensorData.heart_rate,
-                sensorData.body_temp,
-                sensorData.room_temp,
-                sensorData.room_humidity,
-                sensorData.blood_oxy,
-                new Date(sensorData.updatedAt).toISOString() // ✅ Convert string to Date before using .toISOString()
-            );
-    
-            return {
-                ...patient,
-                risk: riskLevel,
-                status: isOffline ? "offline" : "online"
-            };
-        });
+            });
     };
     
     // 🚀 Use the function
     const patientsWithUpdatedRisk: PatientWithRisk[] = getUpdatedPatients();
-
-
+    
     // Counting Cases with Proper Typing
     const countCases = (): RiskCount => {
         return patientsWithUpdatedRisk.reduce(
