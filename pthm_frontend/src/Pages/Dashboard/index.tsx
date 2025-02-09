@@ -1,6 +1,6 @@
-import { LocalHospital, NotificationsActive, Warning, Shield } from "@mui/icons-material";
+import { LocalHospital, NotificationsActive, Warning, Shield, Search } from "@mui/icons-material";
 import { DashboardMetricCard, DashboardPatientCard } from "../../Components";
-import { Grid2, Box, Typography } from "@mui/material";
+import { Grid2, Box, Typography, TextField, InputAdornment } from "@mui/material";
 import PatientDashboard from "../../Models/PatientDashboard";
 import SensorDashboard from "../../Models/SensorDashboard";
 import { useState, useEffect, useRef } from "react";
@@ -22,11 +22,12 @@ type PatientWithRisk = PatientDashboard & {
 export const Dashboard = () => {
     const [patients, setPatients] = useState<PatientDashboard[]>([]);
     const [sensors, setSensors] = useState<SensorDashboard[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const user = userData();
 
     const fetchPatients = async () => {
         try {
-            const response = await Repo.PatientRepository.getAll(user.jwt);
+            const response = await Repo.PatientDashboardRepository.getAll(user.jwt);
             if(response){
                 setPatients(response);
             }
@@ -110,11 +111,17 @@ export const Dashboard = () => {
         }
     };
     
+    const filteredPatients = patients.filter(patient => 
+        patient.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        patient.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        patient.room.toString().includes(searchQuery) ||
+        patient.patient_id.toString().includes(searchQuery)
+    );
 
     const getUpdatedPatients = (): PatientWithRisk[] => {
-        if (!Array.isArray(patients) || patients.length === 0) return []; // Ensure it's an array
+        if (!Array.isArray(filteredPatients) || filteredPatients.length === 0) return []; // Ensure it's an array
     
-        return patients.map(patient => {
+        return filteredPatients.map(patient => {
             const sensorData = sensors.find(sensor => sensor.patient_id === patient.patient_id);
     
             if (!sensorData) {
@@ -147,8 +154,6 @@ export const Dashboard = () => {
             };
         });
     };
-    
-    
     
     // 🚀 Use the function
     const patientsWithUpdatedRisk: PatientWithRisk[] = getUpdatedPatients();
@@ -230,24 +235,43 @@ export const Dashboard = () => {
                 </Grid2>
             </Grid2>
             <Box 
-                mt={4} 
+                display="flex" 
+                alignItems="center" 
+                justifyContent="space-between" 
+                gap={2} 
                 p={2} 
-                sx={{ 
-                    backgroundColor: "#FFF", 
-                    borderRadius: 4, 
-                    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
-                    marginBottom: 3
-                }}
+                bgcolor="background.paper" 
+                borderRadius={2} 
+                boxShadow={1}
+                mt={4} // Added margin-top to create space above
+                mb={4} // Added margin-bottom to create space below
             >
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Typography variant="body1" fontWeight="bold">
+                <Box display="flex" alignItems="center" gap={2} flex={1}>
+                    <Typography variant="h6" fontWeight="bold">
                         All Patients
                     </Typography>
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body2" sx={{ cursor: "pointer" }}>1</Typography>
-                        <Typography variant="body2" sx={{ cursor: "pointer" }}>2</Typography>
-                        <Typography variant="body2" sx={{ cursor: "pointer" }}>{">>"}</Typography>
-                    </Box>
+                    <TextField
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        placeholder="Search by Name, Room, or ID"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search color="primary" />
+                                </InputAdornment>
+                            ),
+                            sx: { borderRadius: 2, boxShadow: "0 2px 6px rgba(0,0,0,0.1)" },
+                        }}
+                        sx={{ maxWidth: 300 }}
+                    />
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>1</Typography>
+                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>2</Typography>
+                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>{">>"}</Typography>
                 </Box>
             </Box>
             
