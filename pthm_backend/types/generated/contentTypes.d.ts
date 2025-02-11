@@ -387,6 +387,13 @@ export interface ApiPatientDataPatientData extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    doctor_name: Schema.Attribute.String & Schema.Attribute.Required;
+    family_email: Schema.Attribute.String & Schema.Attribute.Required;
+    family_phone: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 10;
+      }>;
     first_name: Schema.Attribute.String & Schema.Attribute.Required;
     gender: Schema.Attribute.Enumeration<['male', 'female', 'lgbtq']> &
       Schema.Attribute.Required;
@@ -404,11 +411,6 @@ export interface ApiPatientDataPatientData extends Struct.CollectionTypeSchema {
         minLength: 6;
       }> &
       Schema.Attribute.DefaultTo<'000000'>;
-    phone: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 10;
-      }>;
     publishedAt: Schema.Attribute.DateTime;
     room: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -435,6 +437,7 @@ export interface ApiSensorDeviceSensorDevice
   };
   attributes: {
     blood_oxy: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    body_temp: Schema.Attribute.Decimal & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -458,7 +461,8 @@ export interface ApiSensorDeviceSensorDevice
         maxLength: 6;
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    temperature: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    room_humidity: Schema.Attribute.Decimal;
+    room_temp: Schema.Attribute.Decimal & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

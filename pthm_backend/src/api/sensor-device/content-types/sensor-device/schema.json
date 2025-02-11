@@ -12,7 +12,7 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "temperature": {
+    "body_temp": {
       "type": "decimal",
       "required": true
     },
@@ -35,6 +35,13 @@
       "required": true,
       "unique": true,
       "maxLength": 6
+    },
+    "room_temp": {
+      "type": "decimal",
+      "required": true
+    },
+    "room_humidity": {
+      "type": "decimal"
     }
   }
 }

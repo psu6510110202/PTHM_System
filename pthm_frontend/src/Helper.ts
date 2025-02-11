@@ -21,9 +21,7 @@ export const storeUser = (data:any) => {
         JSON.stringify({
             id: data.user.id,
             username: data.user.username,
-            avatar: data.user.avatar,
-            userComments: data.user.userComments,
-            userArticles: data.user.userArticles,
+            email: data.user.email,
             jwt: data.jwt
         }),
         secretKey

@@ -1,0 +1,145 @@
+[
+    {
+        "id": "39d4dd7e8b3aec07",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "sensor/device/#",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "29974013574735d0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 400,
+        "wires": [
+            [
+                "75b9b4772415c077",
+                "ce53a8b350eb4bfe"
+            ]
+        ]
+    },
+    {
+        "id": "0ac8cc60bfee50de",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "78a67668e0129b9a",
+        "type": "postgres",
+        "z": "f6f2187d.f17ca8",
+        "postgresdb": "c8f0a82dcdcfbee9",
+        "name": "PTHN_DB",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "1",
+        "return_on_error": false,
+        "limit_queries": "0",
+        "limit_by": "payload",
+        "limit_value": "1",
+        "limit_drop_intermediate": false,
+        "limit_drop_if_in_queue": false,
+        "outputs": true,
+        "x": 810,
+        "y": 380,
+        "wires": [
+            [
+                "0ac8cc60bfee50de"
+            ]
+        ]
+    },
+    {
+        "id": "75b9b4772415c077",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Update data from sensors",
+        "func": "// Extract device_id from topic (assuming format \"sensor/device/000001\")\nvar topicParts = msg.topic.split(\"/\");\nvar device_id = topicParts[2]; // Extracts '000001' dynamically\n\nvar data = msg.payload;\nvar body_temp = data.body_temp;\nvar heart_rate = data.heart_rate;\nvar blood_oxy = data.blood_oxy;\nvar room_temp = data.room_temp;\nvar room_humidity = data.room_humidity;\nvar patient_id = data.patient_id || device_id; // Fallback to device_id if patient_id is missing\n\nmsg.payload = `\n    UPDATE public.sensor_devices \n    SET body_temp = ${body_temp}, heart_rate = ${heart_rate}, blood_oxy = ${blood_oxy}, \n        room_temp = ${room_temp}, room_humidity = ${room_humidity}, updated_at = now(), published_at = now()\n    WHERE device_id = '${device_id}' AND patient_id = '${patient_id}';\n`;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 340,
+        "wires": [
+            [
+                "78a67668e0129b9a"
+            ]
+        ]
+    },
+    {
+        "id": "ce53a8b350eb4bfe",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "First time sensor device connection",
+        "func": "// Extract device_id from topic (assuming format \"sensor/device/000001\")\nvar topicParts = msg.topic.split(\"/\");\nvar device_id = topicParts[2]; // Extracts '000001' dynamically\n\nvar data = msg.payload;\nvar body_temp = data.body_temp;\nvar heart_rate = data.heart_rate;\nvar blood_oxy = data.blood_oxy;\nvar room_temp = data.room_temp;\nvar room_humidity = data.room_humidity;\nvar patient_id = data.patient_id || device_id; // Fallback to device_id if patient_id is missing\n\nmsg.payload = `  \n    INSERT INTO public.sensor_devices (document_id, device_id, body_temp, heart_rate, blood_oxy, room_temp, room_humidity, patient_id, created_at, updated_at, published_at, created_by_id, updated_by_id, locale)\n    SELECT gen_random_uuid(), '${device_id}', ${body_temp}, ${heart_rate}, ${blood_oxy}, ${room_temp}, ${room_humidity}, '${patient_id}', now(), now(), now(), 1, 1, null \n    WHERE NOT EXISTS (SELECT 1 FROM public.sensor_devices WHERE device_id = '${device_id}');\n` \n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 420,
+        "wires": [
+            [
+                "78a67668e0129b9a"
+            ]
+        ]
+    },
+    {
+        "id": "29974013574735d0",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "172.19.0.2",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "c8f0a82dcdcfbee9",
+        "type": "postgresdb",
+        "cfgname": "PTHM_DB",
+        "hostname": "172.19.0.5",
+        "port": 5432,
+        "db": "pthm_db",
+        "ssl": false
+    }
+]

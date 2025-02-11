@@ -40,7 +40,7 @@
       "type": "date",
       "required": true
     },
-    "phone": {
+    "family_phone": {
       "type": "string",
       "required": true,
       "maxLength": 10
@@ -56,6 +56,15 @@
     },
     "age": {
       "type": "integer",
+      "required": true
+    },
+    "doctor_name": {
+      "type": "string",
+      "unique": false,
+      "required": true
+    },
+    "family_email": {
+      "type": "string",
       "required": true
     }
   }
