@@ -9,8 +9,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Passw0rd
       POSTGRES_DB: pthm_db
+      TZ: "Asia/Bangkok"
     volumes:
-      - db_data:/var/lib/postgresql/data # Persistent volume for PostgreSQL data
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - my_network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -21,9 +24,48 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: root@domain.com
       PGADMIN_DEFAULT_PASSWORD: Passw0rd
+      TZ: "Asia/Bangkok"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin # Persistent volume for pgAdmin data
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - my_network
+
+  node-red:
+    image: nodered/node-red
+    container_name: node-red
+    restart: always
+    ports:
+      - "1880:1880"
+    volumes:
+      - node_red_data:/data
+    environment:
+      - TZ=Asia/Bangkok
+    depends_on:
+      - db
+      - mosquitto  # Ensure Node-RED starts after Mosquitto
+    networks:
+      - my_network
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    restart: always
+    ports:
+      - "1883:1883"  # MQTT Broker port
+      - "9001:9001"  # WebSocket support
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf  # Custom Mosquitto configuration
+    networks:
+      - my_network
+
+networks:
+  my_network:
 
 volumes:
   db_data:
   pgadmin_data:
+  node_red_data:
+  mosquitto_data:
+  mosquitto_log:
