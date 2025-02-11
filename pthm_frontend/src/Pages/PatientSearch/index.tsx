@@ -24,14 +24,14 @@ export const PatientSearch = () => {
       }
   };
 
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
   
   useEffect(() => {
       fetchPatients();
 
       intervalRef.current = setInterval(() => {
           fetchPatients();
-      }, 3000);
+      }, 5000);
 
       return () => {
           if (intervalRef.current) clearInterval(intervalRef.current);
