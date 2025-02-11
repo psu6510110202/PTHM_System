@@ -7,6 +7,8 @@ import PatientInfoModel from "../../Models/PatientInfoModel";
 import SensorInfoModel from "../../Models/SensorInfoModel";
 import Repo from "../../Repositories";
 import { userData } from "../../Helper";
+import mqtt from "mqtt"; // Import MQTT.js
+
 
 
 export const Patient = () => {
@@ -42,7 +44,7 @@ export const Patient = () => {
   };
 
 
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
   
   useEffect(() => {
       fetchPatients();
@@ -50,47 +52,101 @@ export const Patient = () => {
       intervalRef.current = setInterval(() => {
           fetchPatients();
           fetchSensors();
-      }, 3000);
+      }, 5000);
 
       return () => {
           if (intervalRef.current) clearInterval(intervalRef.current);
       };
   }, []);
 
-  const generateECGWaveform = (t: number) => {
-    const heartRate = 1.2; // Simulate a heart rate factor (affects frequency of the wave)
+  const mqttClientRef = useRef<mqtt.MqttClient | null>(null);
+
+  useEffect(() => {
+    if (!patientId) return;
   
-    // P-wave: small, smooth wave before the QRS complex
-    const pWave = Math.sin(t * heartRate * 0.3) * 1.5;
+    // If the MQTT client already exists, subscribe only
+    if (!mqttClientRef.current) {
+      const mqttBrokerUrl = "ws://localhost:9001"; // Change to your broker
+      const client = mqtt.connect(mqttBrokerUrl, {
+        clientId: `ecg-client-${Math.random().toString(16).slice(2, 10)}`,
+        clean: true,
+        reconnectPeriod: 1000, // Adjust to prevent aggressive reconnections
+      });
   
-    // QRS complex: sharp, large spike (Q wave down, R wave up, S wave down)
-    const qrsComplex =
-      Math.sin(t * heartRate * 2) * 15 * Math.exp(-Math.pow(t % 50 - 25, 2) / 50);
+      mqttClientRef.current = client;
   
-    // T-wave: larger smooth wave after the QRS complex
-    const tWave = Math.sin(t * heartRate * 0.15) * 4;
+      client.on("connect", () => {
+        console.log("MQTT Connected");
+      });
   
-    // Baseline wander and random noise
-    const baselineWander = Math.sin(t * heartRate * 0.02) * 0.5; // slow baseline drift
-    const noise = (Math.random() - 0.5) * 0.5;
+      client.on("error", (err) => {
+        console.error("MQTT Error:", err);
+      });
+    }
   
-    return pWave + qrsComplex + tWave + baselineWander + noise;
-  };
+    const topic = `ecg/patient/${patientId}`;
+  
+    // Subscribe to the ECG topic
+    mqttClientRef.current.subscribe(topic, (err) => {
+      if (err) {
+        console.error("MQTT Subscription Error:", err);
+      }
+    });
+    
+    const handleMessage = (receivedTopic: string, message: Buffer) => {
+      if (receivedTopic === topic) {
+        try {
+          const jsonMessage = JSON.parse(message.toString());
+          const ecgValue = jsonMessage.value;
+  
+          if (typeof ecgValue === "number") {
+            // Only update state every 5 messages to reduce load
+            setEcgData((prev) => [...prev.slice(-125), ecgValue]);
+          }
+        } catch (err) {
+          console.error("Error parsing ECG JSON data:", err);
+        }
+      }
+    };
+  
+    mqttClientRef.current.on("message", handleMessage);
+  
+    return () => {
+      if (mqttClientRef.current) {
+        console.log(`Unsubscribing from ${topic}`);
+  
+        mqttClientRef.current.removeListener("message", handleMessage);
+        mqttClientRef.current.unsubscribe(topic, () => {
+          console.log(`Unsubscribed from ${topic}`);
+        });
+  
+        console.log("Disconnecting MQTT client...");
+        mqttClientRef.current.end(true, () => {
+          console.log("MQTT client fully disconnected");
+        });
+  
+        mqttClientRef.current = null;
+      }
+    };
+  }, [patientId]);
+  
   
   
 
-  useEffect(() => {
-    let t = 0; // Time step
-    const interval = setInterval(() => {
-      setEcgData((prev) => [
-        ...prev.slice(-99), // Keep the last 100 values
-        generateECGWaveform(t), // Use a function to generate ECG-like waves
-      ]);
-      t += 1;
-    }, 10); // Faster updates for a smoother look
   
-    return () => clearInterval(interval);
-  }, []);
+
+  // useEffect(() => {
+  //   let t = 0; // Time step
+  //   const interval = setInterval(() => {
+  //     setEcgData((prev) => [
+  //       ...prev.slice(-99), // Keep the last 100 values
+  //       generateECGWaveform(t), // Use a function to generate ECG-like waves
+  //     ]);
+  //     t += 1;
+  //   }, 10); // Faster updates for a smoother look
+  
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <Box sx={{ p: 4 }}>
