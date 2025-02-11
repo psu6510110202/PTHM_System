@@ -23,6 +23,8 @@ export const Dashboard = () => {
     const [patients, setPatients] = useState<PatientDashboard[]>([]);
     const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const patientsPerPage = 12;
     const user = userData();
 
     const fetchPatients = async () => {
@@ -50,7 +52,7 @@ export const Dashboard = () => {
         }
     };
 
-    const intervalRef = useRef<number | null>(null);
+    const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
 
     useEffect(() => {
         fetchPatients();
@@ -59,7 +61,7 @@ export const Dashboard = () => {
         intervalRef.current = setInterval(() => {
             fetchPatients();
             fetchSensors();
-        }, 3000);
+        }, 5000);
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
@@ -181,6 +183,12 @@ export const Dashboard = () => {
     }))
     .sort((a, b) => a.priority - b.priority);
 
+    const totalPages = Math.ceil(sortedPatients.length / patientsPerPage);
+    const paginatedPatients = sortedPatients.slice(
+        (currentPage - 1) * patientsPerPage,
+        currentPage * patientsPerPage
+    );
+
     return (
         <>
             <Box display="flex" justifyContent="center" mb={3}>
@@ -269,15 +277,22 @@ export const Dashboard = () => {
                         sx={{ maxWidth: 300 }}
                     />
                 </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>1</Typography>
-                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>2</Typography>
-                    <Typography variant="body2" sx={{ cursor: "pointer", p: 1, borderRadius: 1, "&:hover": { bgcolor: "action.hover" } }}>{">>"}</Typography>
+                <Box display="flex" justifyContent="center" mt={4} gap={1}>
+                    {[...Array(totalPages)].map((_, index) => (
+                        <Typography 
+                            key={index} 
+                            variant="body2" 
+                            sx={{ cursor: "pointer", p: 1, borderRadius: 1, bgcolor: currentPage === index + 1 ? "primary.main" : "transparent", color: currentPage === index + 1 ? "white" : "black", "&:hover": { bgcolor: "action.hover" } }}
+                            onClick={() => setCurrentPage(index + 1)}
+                        >
+                            {index + 1}
+                        </Typography>
+                    ))}
                 </Box>
             </Box>
             
             <Grid2 container spacing={4}>
-                {sortedPatients.map((patient, index) => (
+                {paginatedPatients.map((patient, index) => (
                     <Grid2 
                         key={index} 
                         size={{
