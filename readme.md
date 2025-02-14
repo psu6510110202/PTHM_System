@@ -31,7 +31,7 @@ http://localhost:1880
 4. Search for and install:
 
 ```
-node-red-contrib-postgrestor-next
+node-red-contrib-re-postgres
 ```
 
 ### 3. Import Flow Configuration
