@@ -1,8 +1,8 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[pthm_dashboard_lvng.eez-project]:/userPages/3",
-    "selectedActionObject": "[pthm_dashboard_lvng.eez-project]:/actions/-1",
-    "selectedBitmapObject": "[pthm_dashboard_lvng.eez-project]:/bitmaps/11",
+    "selectedUserPageObject": "[pthm_dashboard_lvng.eez-project]:/userPages/2",
+    "selectedActionObject": "[pthm_dashboard_lvng.eez-project]:/actions/0",
+    "selectedBitmapObject": "[pthm_dashboard_lvng.eez-project]:/bitmaps/12",
     "subnavigationSelectedItems": {}
   },
   "layoutModel": {
@@ -71,7 +71,7 @@
           },
           {
             "type": "border",
-            "selected": 0,
+            "selected": 1,
             "location": "bottom",
             "children": [
               {
@@ -118,7 +118,7 @@
             {
               "type": "row",
               "id": "#7f199553-86e5-4226-95c4-fc2e10f01ff2",
-              "weight": 23.389312977099237,
+              "weight": 34.54965357967667,
               "children": [
                 {
                   "type": "tabset",
@@ -155,7 +155,7 @@
                 {
                   "type": "tabset",
                   "id": "#5034ba89-a0d4-44fd-ba70-e0ce2ad300f3",
-                  "weight": 1.4056847545219637,
+                  "weight": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -171,7 +171,7 @@
                 {
                   "type": "tabset",
                   "id": "#d40e8a1e-5c4c-4958-a8b3-17448018b433",
-                  "weight": 0.5943152454780362,
+                  "weight": 0,
                   "enableClose": false,
                   "children": [
                     {
@@ -189,17 +189,17 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 56.61068702290076,
+              "weight": 40.967520940332975,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
                   "id": "#b756d021-fa02-4e1b-8a10-18eb6cf0624d",
-                  "name": "Room_Page",
+                  "name": "Temp_Page",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[pthm_dashboard_lvng.eez-project]:/userPages/3",
+                    "objectPath": "[pthm_dashboard_lvng.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -233,7 +233,7 @@
             {
               "type": "row",
               "id": "#3971b32d-c4f1-47a1-9e3e-c648a3004bc0",
-              "weight": 20,
+              "weight": 24.482825479990343,
               "children": [
                 {
                   "type": "tabset",
@@ -997,13 +997,14 @@
     "[pthm_dashboard_lvng.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {}
+          "0": {},
+          "1": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -231.46969696969745,
-          "y": -179.20346320346323
+          "x": -342.9494949494956,
+          "y": -234.20815295815305
         },
         "scale": 1.5
       },
@@ -1018,12 +1019,14 @@
       "selection": {
         "0": {
           "0": {},
+          "2": {},
+          "3": {},
           "4": {},
-          "5": {},
-          "7": {},
-          "11": {
+          "5": {
             "$selected": true
           },
+          "7": {},
+          "11": {},
           "12": {}
         }
       },
@@ -1032,7 +1035,7 @@
           "x": -360,
           "y": -220
         },
-        "scale": 1.5
+        "scale": 2.5
       },
       "timeline": {
         "isEditorActive": false,
@@ -1045,6 +1048,7 @@
       "selection": {
         "0": {
           "0": {},
+          "3": {},
           "5": {},
           "6": {},
           "7": {}
@@ -1052,8 +1056,8 @@
       },
       "transform": {
         "translate": {
-          "x": -100.10714285714286,
-          "y": -339.6714285714285
+          "x": -251.0642857142857,
+          "y": -180.20285714285708
         },
         "scale": 1.5
       },
@@ -1068,7 +1072,12 @@
       "selection": {
         "0": {
           "0": {},
+          "2": {
+            "$selected": true
+          },
+          "4": {},
           "5": {},
+          "7": {},
           "8": {},
           "9": {},
           "10": {}

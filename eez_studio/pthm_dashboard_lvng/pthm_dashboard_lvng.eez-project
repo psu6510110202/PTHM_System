@@ -816,7 +816,7 @@
                     "DEFAULT": {
                       "text_color": "#f70000",
                       "text_font": "MONTSERRAT_24",
-                      "text_align": "CENTER"
+                      "text_align": "RIGHT"
                     }
                   }
                 }
@@ -1208,9 +1208,9 @@
             {
               "objID": "4efeb360-36df-4a4b-f5fc-5fd65f948a0d",
               "type": "LVGLLabelWidget",
-              "left": 34,
+              "left": 31,
               "top": 211,
-              "width": 46,
+              "width": 53,
               "height": 21,
               "customInputs": [],
               "customOutputs": [],
@@ -1260,7 +1260,7 @@
             {
               "objID": "9879ace6-d2ac-4dab-d82b-2031d683912c",
               "type": "LVGLLabelWidget",
-              "left": 82,
+              "left": 90,
               "top": 211,
               "width": 13,
               "height": 21,
@@ -1448,9 +1448,9 @@
             {
               "objID": "f89efe84-c305-480e-8ff1-c156ee086b0d",
               "type": "LVGLLabelWidget",
-              "left": 170,
+              "left": 168,
               "top": 99,
-              "width": 45,
+              "width": 52,
               "height": 21,
               "customInputs": [],
               "customOutputs": [],
@@ -1500,7 +1500,7 @@
             {
               "objID": "de0af458-20b9-4f77-e087-af00d9534807",
               "type": "LVGLLabelWidget",
-              "left": 218,
+              "left": 221,
               "top": 99,
               "width": 13,
               "height": 21,
@@ -1551,9 +1551,9 @@
             {
               "objID": "8fe096ed-0b03-40de-d7ae-a654f4c68b0c",
               "type": "LVGLLabelWidget",
-              "left": 244,
+              "left": 241,
               "top": 99,
-              "width": 48,
+              "width": 56,
               "height": 21,
               "customInputs": [],
               "customOutputs": [],
@@ -1603,7 +1603,7 @@
             {
               "objID": "c2101804-7669-45df-9830-2e14e5cb7c89",
               "type": "LVGLLabelWidget",
-              "left": 295,
+              "left": 298,
               "top": 99,
               "width": 15,
               "height": 21,
@@ -1704,7 +1704,7 @@
             {
               "objID": "57ba1b8f-4094-4b9f-c993-10dee405fb3d",
               "type": "LVGLLabelWidget",
-              "left": 187,
+              "left": 184,
               "top": 180,
               "width": 46,
               "height": 16,
@@ -1754,7 +1754,7 @@
             {
               "objID": "8f29300a-e0c0-4d0d-84f4-adbd391b689c",
               "type": "LVGLLabelWidget",
-              "left": 186,
+              "left": 183,
               "top": 205,
               "width": 47,
               "height": 16,
@@ -1804,7 +1804,7 @@
             {
               "objID": "4f09950d-1ff1-491d-db56-4d79f5b33ad6",
               "type": "LVGLImageWidget",
-              "left": 144,
+              "left": 142,
               "top": 179,
               "width": 40,
               "height": 40,
@@ -1850,9 +1850,9 @@
             {
               "objID": "1f1a13b9-0ecb-4b6e-ca89-b0b33aa1d95a",
               "type": "LVGLLabelWidget",
-              "left": 234,
+              "left": 229,
               "top": 180,
-              "width": 74,
+              "width": 82,
               "height": 16,
               "customInputs": [],
               "customOutputs": [],
@@ -1867,7 +1867,7 @@
               "identifier": "pthm_label_info_date_value_dashboard",
               "leftUnit": "px",
               "topUnit": "px",
-              "widthUnit": "content",
+              "widthUnit": "px",
               "heightUnit": "content",
               "children": [],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -1885,7 +1885,8 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_font": "MONTSERRAT_14"
+                      "text_font": "MONTSERRAT_14",
+                      "text_align": "LEFT"
                     }
                   }
                 }
@@ -1900,7 +1901,7 @@
             {
               "objID": "e11d2735-2110-4063-e33a-8c6f6b5e7d29",
               "type": "LVGLLabelWidget",
-              "left": 237,
+              "left": 232,
               "top": 205,
               "width": 34,
               "height": 16,
@@ -3615,9 +3616,9 @@
             {
               "objID": "2352a585-fb02-496d-fade-9271518b1024",
               "type": "LVGLLabelWidget",
-              "left": 165,
+              "left": 180,
               "top": 131,
-              "width": 87,
+              "width": 91,
               "height": 35,
               "customInputs": [],
               "customOutputs": [],
@@ -3667,7 +3668,7 @@
             {
               "objID": "f935bbd7-90f1-4b0d-bb4c-b6acfbab456a",
               "type": "LVGLLabelWidget",
-              "left": 269,
+              "left": 278,
               "top": 131,
               "width": 25,
               "height": 38,
