@@ -16,119 +16,113 @@ export const Patient = () => {
   const [patients, setPatients] = useState<PatientInfoModel[]>([]);
   const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
   const location = useLocation();
-  const patientId = location.state?.patientId; // Retrieve the patient ID from state
+  const patientId = location.state?.patientId;
   const user = userData();
-  
+
   const fetchPatients = async () => {
-    try {
-        const response = await Repo.PatientInfoRepository.getById(patientId ,user.jwt);
-        if(response){
-            setPatients([response]);
-        }
-    } catch (error) {
-        console.error("Error fetching patients:", error);
-        setPatients([]); // Set to empty array on failure
-    }
+      try {
+          const response = await Repo.PatientInfoRepository.getById(patientId, user.jwt);
+          if (response) {
+              setPatients([response]);
+          }
+      } catch (error) {
+          console.error("Error fetching patients:", error);
+          setPatients([]);
+      }
   };
 
   const fetchSensors = async () => {
-    try {
-        const response = await Repo.SensorRepository.getByPatientId(patientId ,user.jwt);
-        if(response){
-            setSensors([response]);
-        }
-    } catch (error) {
-        console.error("Error fetching patients:", error);
-        setPatients([]); // Set to empty array on failure
-    }
+      try {
+          const response = await Repo.SensorRepository.getByPatientId(patientId, user.jwt);
+          if (response) {
+              setSensors([response]);
+          }
+      } catch (error) {
+          console.error("Error fetching sensors:", error);
+          setSensors([]); // Corrected from setPatients([])
+      }
   };
 
-
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
-  
+
   useEffect(() => {
+      if (!patientId) return;
+      
       fetchPatients();
       fetchSensors();
+
       intervalRef.current = setInterval(() => {
           fetchPatients();
           fetchSensors();
-      }, 5000);
+      }, 10000);
 
       return () => {
           if (intervalRef.current) clearInterval(intervalRef.current);
       };
-  }, []);
+  }, [patientId]); // Ensure it only runs when patientId changes
 
   const mqttClientRef = useRef<mqtt.MqttClient | null>(null);
+  let messageCounter = 0;
 
-  useEffect(() => {
-    if (!patientId) return;
-  
-    // If the MQTT client already exists, subscribe only
-    if (!mqttClientRef.current) {
-      const mqttBrokerUrl = "ws://localhost:9001"; // Change to your broker
-      const client = mqtt.connect(mqttBrokerUrl, {
-        clientId: `ecg-client-${Math.random().toString(16).slice(2, 10)}`,
-        clean: true,
-        reconnectPeriod: 1000, // Adjust to prevent aggressive reconnections
-      });
-  
-      mqttClientRef.current = client;
-  
-      client.on("connect", () => {
-        console.log("MQTT Connected");
-      });
-  
-      client.on("error", (err) => {
-        console.error("MQTT Error:", err);
-      });
-    }
-  
-    const topic = `ecg/patient/${patientId}`;
-  
-    // Subscribe to the ECG topic
-    mqttClientRef.current.subscribe(topic, (err) => {
-      if (err) {
-        console.error("MQTT Subscription Error:", err);
-      }
-    });
-    
-    const handleMessage = (receivedTopic: string, message: Buffer) => {
+useEffect(() => {
+  if (!patientId || mqttClientRef.current) return;
+
+  const mqttBrokerUrl = "ws://localhost:9001";
+  const client = mqtt.connect(mqttBrokerUrl, {
+      clientId: `ecg-client-${Math.random().toString(16).slice(2, 10)}`,
+      clean: true,
+      reconnectPeriod: 1000,
+  });
+
+  mqttClientRef.current = client;
+
+  client.on("connect", () => console.log("MQTT Connected"));
+  client.on("error", (err) => console.error("MQTT Error:", err));
+
+  const topic = `ecg/patient/${patientId}`;
+
+  client.subscribe(topic, (err) => {
+      if (err) console.error("MQTT Subscription Error:", err);
+  });
+
+  const handleMessage = (receivedTopic: string, message: Buffer) => {
       if (receivedTopic === topic) {
-        try {
-          const jsonMessage = JSON.parse(message.toString());
-          const ecgValue = jsonMessage.value;
-  
-          if (typeof ecgValue === "number") {
-            // Only update state every 5 messages to reduce load
-            setEcgData((prev) => [...prev.slice(-125), ecgValue]);
+          try {
+              const jsonMessage = JSON.parse(message.toString());
+              const ecgValue = jsonMessage.value;
+
+              if (typeof ecgValue === "number") {
+                  messageCounter++;
+                  if (messageCounter % 2 === 0) {
+                      setEcgData((prev) => [...prev.slice(-100), ecgValue]);
+                  }
+              }
+          } catch (err) {
+              console.error("Error parsing ECG JSON data:", err);
           }
-        } catch (err) {
-          console.error("Error parsing ECG JSON data:", err);
-        }
       }
-    };
-  
-    mqttClientRef.current.on("message", handleMessage);
-  
-    return () => {
+  };
+
+  client.on("message", handleMessage);
+
+  return () => {
       if (mqttClientRef.current) {
-        console.log(`Unsubscribing from ${topic}`);
-  
-        mqttClientRef.current.removeListener("message", handleMessage);
-        mqttClientRef.current.unsubscribe(topic, () => {
-          console.log(`Unsubscribed from ${topic}`);
-        });
-  
-        console.log("Disconnecting MQTT client...");
-        mqttClientRef.current.end(true, () => {
-          console.log("MQTT client fully disconnected");
-        });
-  
-        mqttClientRef.current = null;
+          console.log(`Unsubscribing from ${topic}`);
+
+          mqttClientRef.current.removeListener("message", handleMessage);
+          mqttClientRef.current.unsubscribe(topic, () => {
+              console.log(`Unsubscribed from ${topic}`);
+          });
+
+          console.log("Disconnecting MQTT client...");
+          mqttClientRef.current.end(true, () => {
+              console.log("MQTT client fully disconnected");
+          });
+
+          mqttClientRef.current = null;
       }
-    };
-  }, [patientId]);
+  };
+}, [patientId]);
   
   
   
