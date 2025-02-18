@@ -2,11 +2,6 @@
 #include <TFT_eSPI.h>
 #include <XPT2046_Touchscreen.h>
 #include "ui.h"
-#include <WiFi.h>
-#include <WebServer.h>
-#include <ElegantOTA.h>
-#include <Preferences.h>
-#include <ArduinoJson.h>
                                                                                                                                                                             
 #define T_CS_PIN  13 //--> T_CS
 
@@ -25,14 +20,18 @@ uint8_t *draw_buf;
 uint16_t x, y, z;
 uint32_t lastTick = 0;
 int Count_Val = 0;
+long unsigned previousMillis;
+
+int day, month, year, hour, minute, heartRate;
+float spo2, body_temp, room_temp, room_humid;
 
 XPT2046_Touchscreen touchscreen(T_CS_PIN);
 
-void log_print(lv_log_level_t level, const char * buf) {
-  LV_UNUSED(level);
-  Serial.println(buf);
-  Serial.flush();
-}
+// void log_print(lv_log_level_t level, const char * buf) {
+//   LV_UNUSED(level);
+//   Serial.println(buf);
+//   Serial.flush();
+// }
 
 void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data) {
   if (touchscreen.touched()) {
@@ -49,16 +48,56 @@ void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data) {
   }
 }
 
-//________________________________________________________________________________ my_image_eez_event_handler()
-// Callback that is triggered when "my_image_eez" is clicked.
-// static void my_image_eez_event_handler(lv_event_t * e) {
-//   lv_event_code_t code = lv_event_get_code(e);  //--> Get the event code.
-  
-//   if (code == LV_EVENT_CLICKED) {
-//     lv_label_set_text(objects.my_label_img_sta, "EEZ image is\nTouched.");
-//   }
-// }
-//________________________________________________________________________________ 
+void receive_SensorValues(){
+  if (Serial.available() && ((millis() - previousMillis) % 1000) >= 1) {
+    char buffer[100];
+    int len = Serial.readBytesUntil('\n', buffer, sizeof(buffer) - 1); // Read until newline
+    buffer[len] = '\0'; // Null-terminate the string
+    sscanf(buffer, "%02d/%02d/%04d;%02d:%02d;%d;%f;%f;%f;%f;", 
+           &day, &month, &year, &hour, &minute, 
+           &heartRate, &spo2, &body_temp, &room_temp, &room_humid);
+
+    // Print received values
+    // Serial.printf("Date: %02d/%02d/%04d Time: %02d:%02d\n", day, month, year, hour, minute);
+    // Serial.printf("Heart Rate: %d bpm, SpO2: %.2f%%\n", heartRate, spo2);
+    // Serial.printf("Body Temp: %.2f°C, Room Temp: %.2f°C, Humidity: %.2f%%\n", 
+    //               body_temp, room_temp, room_humid);
+  }
+}
+
+
+void update_SensorValues() {
+  if (millis() - previousMillis >= 10000) {
+    previousMillis = millis();
+
+    char date_buffer[11]; 
+    char time_buffer[6];  
+
+    snprintf(date_buffer, sizeof(date_buffer), "%02d/%02d/%04d", day, month, year);
+    snprintf(time_buffer, sizeof(time_buffer), "%02d:%02d", hour, minute);
+
+    lv_label_set_text(objects.pthm_label_info_date_value_dashboard, date_buffer);
+    lv_label_set_text(objects.pthm_label_info_time_value_dashboard, time_buffer);
+
+    lv_label_set_text(objects.pthm_label_heartrate_dashboard, String(heartRate).c_str());
+    lv_label_set_text(objects.pthm_label_heartrate_heartpage, String(heartRate).c_str());
+
+    lv_label_set_text(objects.pthm_label_spo2_dashboard, String(spo2).c_str());
+    lv_label_set_text(objects.pthm_label_spo2_heartpage, String(spo2).c_str());
+
+    lv_label_set_text(objects.pthm_label_bodytemp_dashboard, String(body_temp).c_str());
+    lv_label_set_text(objects.pthm_label_bodytemp_temppage, String(body_temp).c_str());
+    lv_arc_set_value(objects.pthm_arc_bodytemp_dashboard, body_temp);
+    lv_arc_set_value(objects.pthm_arc_bodytemp_temppage, body_temp);
+
+    lv_label_set_text(objects.pthm_label_roomtemp_dashboard, String(room_temp).c_str());
+    lv_label_set_text(objects.pthm_label_roomtemp_roompage, String(room_temp).c_str());
+
+    lv_label_set_text(objects.pthm_label_roomhumid_dashboard, String(room_humid).c_str());
+    lv_label_set_text(objects.pthm_label_roomhumid_roompage, String(room_humid).c_str());
+  }
+}
+
 
 void basic_Startup(){
   Serial.begin(115200);
@@ -88,7 +127,7 @@ void touchscreen_Startup(){
 
 void lvgl_Startup(){
   lv_init();
-  lv_log_register_print_cb(log_print);
+  // lv_log_register_print_cb(log_print);
   lv_display_t * disp;
   draw_buf = new uint8_t[DRAW_BUF_SIZE];
   disp = lv_tft_espi_create(SCREEN_HEIGHT, SCREEN_WIDTH, draw_buf, DRAW_BUF_SIZE);
@@ -110,7 +149,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  receive_SensorValues();
+  update_SensorValues();
 
   lv_tick_inc(millis() - lastTick); //--> Update the tick timer. Tick is new for LVGL 9.
   lastTick = millis();
