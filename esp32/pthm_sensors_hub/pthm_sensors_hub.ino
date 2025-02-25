@@ -4,6 +4,30 @@
 #include <Preferences.h>
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
+#include <Arduino.h>
+#include "test_ad8232.h"
+#include "test_ds18b20.h"
+#include "test_max30100.h"
+#include "test_dht11.h"
+#include "esp_task_wdt.h"
+#include <Wire.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <time.h>  // Include time.h for proper time struct handling
+
+// Task Handles
+TaskHandle_t TaskAD8232;
+TaskHandle_t TaskDS18B20;
+TaskHandle_t TaskMAX30100;
+TaskHandle_t TaskDHT11;
+TaskHandle_t buttonTaskHandle = NULL;
+
+// Time tracking variables
+unsigned long tsLastPrintECG = 0;
+unsigned long tsLastPrintOther = 0;
+
+#define ECG_PRINT_PERIOD_MS 1000  // ECG (AD8232) print period 10 seconds
+#define OTHER_PRINT_PERIOD_MS 5000  // Other sensors (DS18B20, MAX30100, DHT11) print period 5 seconds
 
 #define AP_WIFI_SSID "PTHM_AP"
 #define AP_WIFI_PASS "password"
@@ -13,7 +37,7 @@
 #define MQTT_NAME "D000005"
 
 #define DEVICE_ID "000005"
-#define BUTTON_PIN 14
+#define BUTTON_PIN 12
 #define WIFI_TIMEOUT_MS 5000 // 15 seconds timeout for WiFi connection
 
 WebServer server(80);
@@ -21,13 +45,12 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 Preferences pref;
 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 25200); // UTC+7 (7 * 3600)
 
 String STA_WIFI_SSID, STA_WIFI_PASS, PATIENT_ID;
-float BODY_TEMP, BLOOD_OXY;
-int HEART_RATE, ROOM_TEMP, ROOM_HUMIDITY;
 long unsigned previousMillis;
-
-TaskHandle_t buttonTaskHandle = NULL;
+long unsigned previousMillis2;
 
 void setupWiFi();
 void buttonTask(void *parameter);
@@ -35,6 +58,7 @@ void readNVS();
 void saveNVS();
 void setupWebServer();
 void sendValueMQTT();
+void sendValueDashboard();
 
 const char *index_html PROGMEM = R"(
 <!DOCTYPE html>
@@ -86,11 +110,22 @@ const char *conf_html PROGMEM = R"(
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();
   readNVS();
   setupWiFi(); // Run WiFi setup synchronously to avoid TCP/IP errors
   setupMqttClient();
   setupWebServer();
+
+  initAD8232();
+  initDS18B20();
+  initMAX30100();
+  initDHT11();
+
   xTaskCreatePinnedToCore(buttonTask, "Button Task", 2048, NULL, 1, &buttonTaskHandle, 1);
+  xTaskCreatePinnedToCore(TaskReadAD8232,"TaskAD8232",2048,NULL,1,&TaskAD8232,0);
+  xTaskCreatePinnedToCore(TaskReadDS18B20,"TaskDS18B20",2048,NULL,1,&TaskDS18B20,1);
+  xTaskCreatePinnedToCore(TaskReadMAX30100,"TaskMAX30100",8192,NULL,1,&TaskMAX30100,0);
+  xTaskCreatePinnedToCore(TaskReadDHT11,"TaskDHT11",2048,NULL,1,&TaskDHT11,1);
   ElegantOTA.begin(&server);
   Serial.printf("Device ID: %s | Patient ID: %s\n", DEVICE_ID, PATIENT_ID.isEmpty() ? "[Config Before Use]" : PATIENT_ID.c_str());
 }
@@ -99,6 +134,7 @@ void loop() {
   ElegantOTA.loop();
   server.handleClient();
   sendValueMQTT();
+  sendValueDashboard();
 }
 
 void setupWiFi() {
@@ -114,6 +150,7 @@ void setupWiFi() {
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nConnected to Wi-Fi: " + WiFi.localIP().toString());
+    timeClient.begin();
   } else {
     Serial.println("\nWi-Fi connection failed. Starting AP mode...");
     WiFi.softAP(AP_WIFI_SSID, AP_WIFI_PASS);
@@ -174,6 +211,50 @@ void setupMqttClient(){
     }
   }
 }
+// Function for MAX30100 task
+void TaskReadMAX30100(void *pvParameters) {
+    esp_task_wdt_add(NULL);
+
+    while (1) {
+      updateMAX30100();
+      esp_task_wdt_reset();
+      vTaskDelay(pdMS_TO_TICKS(100)); 
+    }
+}
+
+// Function for AD8232 task (ECG, 10 seconds update)
+void TaskReadAD8232(void *pvParameters) {
+    while (1) {
+        if (millis() - tsLastPrintECG > ECG_PRINT_PERIOD_MS) {
+            readAD8232();  // Print ECG value
+            tsLastPrintECG = millis();  // Reset the print timer for ECG
+        }
+        vTaskDelay(pdMS_TO_TICKS(120));  // Run every 100ms
+    }
+}
+
+// Function for DS18B20 task (Temperature, 5 seconds update)
+void TaskReadDS18B20(void *pvParameters) {
+    while (1) {
+        if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
+            readDS18B20();  // Print Temperature value
+            tsLastPrintOther = millis();  // Reset the print timer for other sensors
+        }
+        vTaskDelay(pdMS_TO_TICKS(130));  // Run every 100ms
+    }
+}
+
+// Function for DHT11 task (Temperature & Humidity, 5 seconds update)
+void TaskReadDHT11(void *pvParameters) {
+    while (1) {
+        if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
+            readDHT11();  // Print Temperature & Humidity values
+            tsLastPrintOther = millis();  // Reset the print timer for other sensors
+        }
+        vTaskDelay(pdMS_TO_TICKS(140));  // Run every 100ms
+    }
+}
+
 
 void buttonTask(void *parameter) {
     pinMode(BUTTON_PIN, INPUT_PULLUP);
@@ -192,7 +273,7 @@ void buttonTask(void *parameter) {
       } else {
         pressStart = millis();
       }
-      vTaskDelay(pdMS_TO_TICKS(50));
+      vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -200,15 +281,16 @@ void sendValueMQTT(){
   if(millis() - previousMillis >= 10000){
     previousMillis = millis();
 
-    int heartRate = random(60, 121);
-    float spo2 = random(9000, 10000) / 100.0;
-    float body_temp = random(2800, 4500) / 100.0;
-    float room_temp = random(1500, 3500) / 100.0;
-    float room_humid = random(5000, 7000) / 100.0;
+    // int heartRate = heartRate;   // From MAX30100
+    // float spo2 = spO2;           // From MAX30100
+    // float body_temp = body_temp; // Assuming DS18B20 gives room temp, or you can get body temp
+    // float room_temp = room_temp; // From DS18B20
+    // float room_humid = room_humid; // From DHT11
+
 
     StaticJsonDocument<256> doc;
     doc["heart_rate"] = heartRate;
-    doc["blood_oxy"] = spo2;
+    doc["blood_oxy"] = spO2;
     doc["body_temp"] = body_temp;
     doc["room_temp"] = room_temp;
     doc["room_humidity"] = room_humid;
@@ -218,5 +300,28 @@ void sendValueMQTT(){
 
     String topic = "sensor/device/" + String(DEVICE_ID);
     mqttClient.publish(topic.c_str(), jsonBuffer);
+    // Serial.println("MQTT Send");
+  }
+}
+
+void sendValueDashboard(){
+  if(millis() - previousMillis2 >= 10000){
+    previousMillis2 = millis();
+    timeClient.update();
+    time_t rawTime = timeClient.getEpochTime();
+    struct tm *timeInfo = gmtime(&rawTime); // Convert to human-readable format
+    int year =  timeInfo->tm_year + 1900;
+    int month =  timeInfo->tm_mon + 1;
+    int day = timeInfo->tm_mday;
+    int hour = timeInfo->tm_hour;
+    int minute = timeInfo->tm_min;
+
+    char buffer[100]; // Buffer to hold the formatted string
+
+    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d;%02d:%02d;%2d;%.2f;%.2f;%.2f;%.2f;\n", 
+            day, month, year, hour, minute, 
+            heartRate, spO2, body_temp, room_temp, room_humid
+    );
+    Serial.write(buffer);
   }
 }
