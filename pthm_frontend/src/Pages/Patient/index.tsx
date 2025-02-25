@@ -192,6 +192,47 @@ useEffect(() => {
         </Grid2>
       </Box>
 
+      <Grid2 size={{ xs: 12 }}>
+        <Box
+            sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 4,
+            width: "100%",
+            }}
+        >
+            {/* Camera Stream Title */}
+            <Typography variant="h5" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
+            Live Patient Camera Stream
+            </Typography>
+
+            {/* Styled Camera Stream Box */}
+            <Box
+            sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#f9f9f9", // Light grey background
+                borderRadius: "12px",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Soft shadow
+                padding: 2,
+                maxWidth: "1000px",
+                width: "100%",
+            }}
+            >
+            <img
+                src="http://192.168.215.202:3000/video_feed" // Replace with your actual stream URL
+                alt="Live Video Stream"
+                style={{
+                width: "100%",
+                borderRadius: "8px",
+                border: "2px solid #ddd", // Subtle border
+                }}
+            />
+            </Box>
+        </Box>
+      </Grid2>
     </Box>
   );
 };
