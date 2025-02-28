@@ -14,14 +14,18 @@ long unsigned tsLastPrint = 0;
 int heartRate = 0.0;
 float spO2 = 0.0;
 
+int max30100_status;
+
 void initMAX30100() {
   Serial.print("Initializing...");
 
   // Initialize the PulseOximeter instance
   if (!pox.begin()) {
     Serial.println("MAX30100 was not found. Please check the wiring/power.");
+    max30100_status = false;
     while (true);  // Halt execution
   } else {
+    max30100_status = true;
     Serial.println("SUCCESS");
   }
 

@@ -6,6 +6,7 @@
 OneWire oneWire(26);
 DallasTemperature sensors(&oneWire);
 float body_temp;
+int ds18b20_status;
 
 void initDS18B20() {
     Serial.println("Init DS18B20");
@@ -19,7 +20,9 @@ void readDS18B20() {
     // ตรวจสอบถ้าอุณหภูมิเป็น -127.00°C (ค่าเริ่มต้นเมื่อเซ็นเซอร์ไม่สามารถอ่านค่าได้)
     if (body_temp == -127.00) {
         body_temp = 0.00;  // กำหนดให้เป็น 0 หากอ่านค่าไม่ได้
+        ds18b20_status = false;
+        return;
     }
-
+    ds18b20_status = true;
     // Serial.printf("Temp: %.2f°C | %.2f°F\n", body_temp, sensors.toFahrenheit(body_temp));
 }

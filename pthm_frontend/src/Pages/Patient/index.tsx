@@ -221,7 +221,7 @@ useEffect(() => {
                 width: "100%",
             }}
             >
-            <img
+            {/* <img
                 src="http://192.168.215.202:3000/video_feed" // Replace with your actual stream URL
                 alt="Live Video Stream"
                 style={{
@@ -229,7 +229,7 @@ useEffect(() => {
                 borderRadius: "8px",
                 border: "2px solid #ddd", // Subtle border
                 }}
-            />
+            /> */}
             </Box>
         </Box>
       </Grid2>

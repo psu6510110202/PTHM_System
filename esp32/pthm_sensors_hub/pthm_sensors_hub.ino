@@ -10,6 +10,7 @@
 #include "test_max30100.h"
 #include "test_dht11.h"
 #include "esp_task_wdt.h"
+#include "test_oled_i2c.h"
 #include <Wire.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -49,8 +50,13 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 25200); // UTC+7 (7 * 3600)
 
 String STA_WIFI_SSID, STA_WIFI_PASS, PATIENT_ID;
-long unsigned previousMillis;
-long unsigned previousMillis2;
+long unsigned previousMillis_MQTT;
+long unsigned previousMillis_Dashboard;
+long unsigned previousMillis_Status;
+String WIFI_MODE;
+String WIFI_IPADDR;
+String MQTT_STATUS;
+
 
 void setupWiFi();
 void buttonTask(void *parameter);
@@ -111,6 +117,7 @@ const char *conf_html PROGMEM = R"(
 void setup() {
   Serial.begin(115200);
   Wire.begin();
+  oled.begin();
   readNVS();
   setupWiFi(); // Run WiFi setup synchronously to avoid TCP/IP errors
   setupMqttClient();
@@ -133,12 +140,14 @@ void setup() {
 void loop() {
   ElegantOTA.loop();
   server.handleClient();
+  updateSystemStatus();
   sendValueMQTT();
   sendValueDashboard();
 }
 
 void setupWiFi() {
   unsigned long startAttemptTime = millis();
+  WIFI_MODE = "STA";
   WiFi.begin(STA_WIFI_SSID.c_str(), STA_WIFI_PASS.c_str());
   if(!STA_WIFI_SSID.isEmpty() && !STA_WIFI_PASS.isEmpty()){
     Serial.print("Connecting to " + String(STA_WIFI_SSID) + " ");
@@ -149,12 +158,15 @@ void setupWiFi() {
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nConnected to Wi-Fi: " + WiFi.localIP().toString());
+    WIFI_IPADDR = WiFi.localIP().toString();
+    Serial.println("\nConnected to Wi-Fi: " + WIFI_IPADDR);
     timeClient.begin();
   } else {
+    WIFI_MODE = "AP";
     Serial.println("\nWi-Fi connection failed. Starting AP mode...");
     WiFi.softAP(AP_WIFI_SSID, AP_WIFI_PASS);
-    Serial.println("AP Mode: " + WiFi.softAPIP().toString());
+    WIFI_IPADDR = WiFi.softAPIP().toString();
+    Serial.println("AP Mode: " + WIFI_IPADDR);
   }
 }
 
@@ -197,6 +209,7 @@ void setupWebServer() {
 }
 
 void setupMqttClient(){
+  MQTT_STATUS = "Off";
   if (WiFi.status() == WL_CONNECTED && !PATIENT_ID.isEmpty()) {
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
     Serial.println("Connecting to MQTT broker " + String(MQTT_SERVER) + ":" + String(MQTT_PORT));
@@ -204,6 +217,7 @@ void setupMqttClient(){
       if (mqttClient.connect(MQTT_NAME)) {
         // String sensorsTopic = "sensor/device/" + String(DEVICE_ID) + "/data";
         Serial.println("Connected to MQTT broker");
+        MQTT_STATUS = "On";
       } else {
         Serial.println("Failed to connect to MQTT broker, retrying in 5 seconds...");
         delay(5000);
@@ -278,15 +292,8 @@ void buttonTask(void *parameter) {
 }
 
 void sendValueMQTT(){
-  if(millis() - previousMillis >= 10000){
-    previousMillis = millis();
-
-    // int heartRate = heartRate;   // From MAX30100
-    // float spo2 = spO2;           // From MAX30100
-    // float body_temp = body_temp; // Assuming DS18B20 gives room temp, or you can get body temp
-    // float room_temp = room_temp; // From DS18B20
-    // float room_humid = room_humid; // From DHT11
-
+  if(millis() - previousMillis_MQTT >= 10000){
+    previousMillis_MQTT = millis();
 
     StaticJsonDocument<256> doc;
     doc["heart_rate"] = heartRate;
@@ -305,8 +312,8 @@ void sendValueMQTT(){
 }
 
 void sendValueDashboard(){
-  if(millis() - previousMillis2 >= 10000){
-    previousMillis2 = millis();
+  if(millis() - previousMillis_Dashboard >= 10000){
+    previousMillis_Dashboard = millis();
     timeClient.update();
     time_t rawTime = timeClient.getEpochTime();
     struct tm *timeInfo = gmtime(&rawTime); // Convert to human-readable format
@@ -323,5 +330,13 @@ void sendValueDashboard(){
             heartRate, spO2, body_temp, room_temp, room_humid
     );
     Serial.write(buffer);
+  }
+}
+
+void updateSystemStatus(){
+  if(millis() - previousMillis_Status >= 5000){
+    previousMillis_Status = millis();
+    String SENSOR_STATUS = (dht11_status && max30100_status && ds18b20_status ? "Good" : "Bad");
+    oled.displayOLED(WIFI_MODE, WIFI_IPADDR, MQTT_STATUS, SENSOR_STATUS);
   }
 }

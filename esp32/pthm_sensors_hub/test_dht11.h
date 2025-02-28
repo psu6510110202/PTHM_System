@@ -7,6 +7,7 @@
 
 extern float room_temp;
 extern float room_humid;
+extern int dht11_status;
 
 #define DHTPIN 14  // Define the pin where the DHT11 sensor is connected
 #define DHTTYPE DHT11

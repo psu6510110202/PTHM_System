@@ -7,6 +7,7 @@ extern PulseOximeter pox;  // ใช้ extern เพื่อลดการป
 extern int heartRate;
 extern float spO2;
 extern unsigned long tsLastPrint;
+extern int max30100_status;
 
 void initMAX30100();
 void updateMAX30100();

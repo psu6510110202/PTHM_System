@@ -4,6 +4,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 float room_temp;
 float room_humid;
+int dht11_status;
 
 void initDHT11() {
     Serial.println("Initializing DHT11...");
@@ -16,8 +17,10 @@ void readDHT11() {
 
     if (isnan(room_temp) || isnan(room_humid)) {
         Serial.println("Failed to read from DHT11 sensor!");
+        dht11_status = false;
         return;
     }
+    dht11_status = true;
 
     // Serial.print("Temperature: ");
     // Serial.print(room_temp);
