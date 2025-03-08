@@ -10,14 +10,12 @@
 #include "test_max30100.h"
 #include "test_dht11.h"
 #include "esp_task_wdt.h"
-#include "test_oled_i2c.h"
 #include <Wire.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <time.h>  // Include time.h for proper time struct handling
 
 // Task Handles
-TaskHandle_t TaskAD8232;
 TaskHandle_t TaskDS18B20;
 TaskHandle_t TaskMAX30100;
 TaskHandle_t TaskDHT11;
@@ -33,7 +31,7 @@ unsigned long tsLastPrintOther = 0;
 #define AP_WIFI_SSID "PTHM_AP"
 #define AP_WIFI_PASS "password"
 
-#define MQTT_SERVER "192.168.215.202"
+#define MQTT_SERVER "192.168.86.202"
 #define MQTT_PORT 1883
 #define MQTT_NAME "D000005"
 
@@ -117,19 +115,17 @@ const char *conf_html PROGMEM = R"(
 void setup() {
   Serial.begin(115200);
   Wire.begin();
-  oled.begin();
   readNVS();
   setupWiFi(); // Run WiFi setup synchronously to avoid TCP/IP errors
   setupMqttClient();
   setupWebServer();
 
-  initAD8232();
   initDS18B20();
   initMAX30100();
   initDHT11();
 
+  // xTaskCreatePinnedToCore(TaskOLED, "OLED Task", 4096, NULL, 1, &TaskOLEDHandle, 1);
   xTaskCreatePinnedToCore(buttonTask, "Button Task", 2048, NULL, 1, &buttonTaskHandle, 1);
-  xTaskCreatePinnedToCore(TaskReadAD8232,"TaskAD8232",2048,NULL,1,&TaskAD8232,0);
   xTaskCreatePinnedToCore(TaskReadDS18B20,"TaskDS18B20",2048,NULL,1,&TaskDS18B20,1);
   xTaskCreatePinnedToCore(TaskReadMAX30100,"TaskMAX30100",8192,NULL,1,&TaskMAX30100,0);
   xTaskCreatePinnedToCore(TaskReadDHT11,"TaskDHT11",2048,NULL,1,&TaskDHT11,1);
@@ -140,7 +136,6 @@ void setup() {
 void loop() {
   ElegantOTA.loop();
   server.handleClient();
-  updateSystemStatus();
   sendValueMQTT();
   sendValueDashboard();
 }
@@ -227,46 +222,32 @@ void setupMqttClient(){
 }
 // Function for MAX30100 task
 void TaskReadMAX30100(void *pvParameters) {
-    esp_task_wdt_add(NULL);
-
-    while (1) {
-      updateMAX30100();
-      esp_task_wdt_reset();
-      vTaskDelay(pdMS_TO_TICKS(100)); 
-    }
-}
-
-// Function for AD8232 task (ECG, 10 seconds update)
-void TaskReadAD8232(void *pvParameters) {
-    while (1) {
-        if (millis() - tsLastPrintECG > ECG_PRINT_PERIOD_MS) {
-            readAD8232();  // Print ECG value
-            tsLastPrintECG = millis();  // Reset the print timer for ECG
-        }
-        vTaskDelay(pdMS_TO_TICKS(120));  // Run every 100ms
-    }
+  while (1) {
+    updateMAX30100();
+    vTaskDelay(pdMS_TO_TICKS(100)); 
+  }
 }
 
 // Function for DS18B20 task (Temperature, 5 seconds update)
 void TaskReadDS18B20(void *pvParameters) {
-    while (1) {
-        if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
-            readDS18B20();  // Print Temperature value
-            tsLastPrintOther = millis();  // Reset the print timer for other sensors
-        }
-        vTaskDelay(pdMS_TO_TICKS(130));  // Run every 100ms
+  while (1) {
+    if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
+      readDS18B20();  // Print Temperature value
+      tsLastPrintOther = millis();  // Reset the print timer for other sensors
     }
+    vTaskDelay(pdMS_TO_TICKS(130));  // Run every 100ms
+  }
 }
 
 // Function for DHT11 task (Temperature & Humidity, 5 seconds update)
 void TaskReadDHT11(void *pvParameters) {
-    while (1) {
-        if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
-            readDHT11();  // Print Temperature & Humidity values
-            tsLastPrintOther = millis();  // Reset the print timer for other sensors
-        }
-        vTaskDelay(pdMS_TO_TICKS(140));  // Run every 100ms
+  while (1) {
+    if (millis() - tsLastPrintOther > OTHER_PRINT_PERIOD_MS) {
+        readDHT11();  // Print Temperature & Humidity values
+        tsLastPrintOther = millis();  // Reset the print timer for other sensors
     }
+    vTaskDelay(pdMS_TO_TICKS(140));  // Run every 100ms
+  }
 }
 
 
@@ -287,7 +268,7 @@ void buttonTask(void *parameter) {
       } else {
         pressStart = millis();
       }
-      vTaskDelay(pdMS_TO_TICKS(100));
+      vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 
@@ -307,7 +288,6 @@ void sendValueMQTT(){
 
     String topic = "sensor/device/" + String(DEVICE_ID);
     mqttClient.publish(topic.c_str(), jsonBuffer);
-    // Serial.println("MQTT Send");
   }
 }
 
@@ -325,18 +305,15 @@ void sendValueDashboard(){
 
     char buffer[100]; // Buffer to hold the formatted string
 
-    snprintf(buffer, sizeof(buffer), "%02d/%02d/%04d;%02d:%02d;%2d;%.2f;%.2f;%.2f;%.2f;\n", 
-            day, month, year, hour, minute, 
-            heartRate, spO2, body_temp, room_temp, room_humid
+    String SENSOR_STATUS = (dht11_status && max30100_status && ds18b20_status ? "Good" : "Bad");
+    snprintf(buffer, sizeof(buffer), 
+         "%02d/%02d/%04d;%02d:%02d;%2d;%.2f;%.2f;%.2f;%.2f;%s;%s;%s;%s;\n", 
+         day, month, year, hour, minute, 
+         heartRate, spO2, body_temp, room_temp, room_humid,
+         WIFI_MODE, WIFI_IPADDR, MQTT_STATUS, SENSOR_STATUS
     );
     Serial.write(buffer);
   }
 }
 
-void updateSystemStatus(){
-  if(millis() - previousMillis_Status >= 5000){
-    previousMillis_Status = millis();
-    String SENSOR_STATUS = (dht11_status && max30100_status && ds18b20_status ? "Good" : "Bad");
-    oled.displayOLED(WIFI_MODE, WIFI_IPADDR, MQTT_STATUS, SENSOR_STATUS);
-  }
-}
+
