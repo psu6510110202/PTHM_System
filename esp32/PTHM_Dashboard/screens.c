@@ -49,7 +49,6 @@ static void action_event_handler_room_page(lv_event_t *e) {
   }
 }
 
-
 void create_screen_main() {
     lv_obj_t *obj = lv_obj_create(0);
     objects.main = obj;
@@ -202,8 +201,8 @@ void create_screen_main() {
             // pthm_label_spo2_dashboard
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.pthm_label_spo2_dashboard = obj;
-            lv_obj_set_pos(obj, 59, 99);
-            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+            lv_obj_set_pos(obj, 56, 99);
+            lv_obj_set_size(obj, 78, LV_SIZE_CONTENT);
             lv_label_set_text(obj, "99.96");
             lv_obj_set_style_text_color(obj, lv_color_hex(0xfff70000), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -213,7 +212,7 @@ void create_screen_main() {
             // pthm_label_spo2_unit_dashboard
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.pthm_label_spo2_unit_dashboard = obj;
-            lv_obj_set_pos(obj, 130, 99);
+            lv_obj_set_pos(obj, 137, 99);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             lv_label_set_text(obj, "%");
             lv_obj_set_style_text_color(obj, lv_color_hex(0xfff70000), LV_PART_MAIN | LV_STATE_DEFAULT);

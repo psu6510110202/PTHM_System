@@ -2,6 +2,7 @@
 #include <TFT_eSPI.h>
 #include <XPT2046_Touchscreen.h>
 #include "ui.h"
+#include "oled_display.h"
                                                                                                                                                                             
 #define T_CS_PIN  13 //--> T_CS
 
@@ -16,22 +17,24 @@
 #define LED_PIN 27
 #define DRAW_BUF_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT / 10 * (LV_COLOR_DEPTH / 8))
 
+TaskHandle_t TaskOLEDHandle;
+
 uint8_t *draw_buf;
 uint16_t x, y, z;
 uint32_t lastTick = 0;
 int Count_Val = 0;
 long unsigned previousMillis;
+long unsigned lastStatus;
+long unsigned lastECG;
+
+int displayMode = 0;
+int buffer_hr = 0;
 
 int day, month, year, hour, minute, heartRate;
 float spo2, body_temp, room_temp, room_humid;
+char wifi_mode[10], wifi_ip[20], mqtt_status[10], sensor_status[10];
 
 XPT2046_Touchscreen touchscreen(T_CS_PIN);
-
-// void log_print(lv_log_level_t level, const char * buf) {
-//   LV_UNUSED(level);
-//   Serial.println(buf);
-//   Serial.flush();
-// }
 
 void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data) {
   if (touchscreen.touched()) {
@@ -50,28 +53,25 @@ void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data) {
 
 void receive_SensorValues(){
   if (Serial.available() && ((millis() - previousMillis) % 1000) >= 1) {
-    char buffer[100];
+    char buffer[200];
     int len = Serial.readBytesUntil('\n', buffer, sizeof(buffer) - 1); // Read until newline
     buffer[len] = '\0'; // Null-terminate the string
-    sscanf(buffer, "%02d/%02d/%04d;%02d:%02d;%d;%f;%f;%f;%f;", 
-           &day, &month, &year, &hour, &minute, 
-           &heartRate, &spo2, &body_temp, &room_temp, &room_humid);
-
-    // Print received values
-    // Serial.printf("Date: %02d/%02d/%04d Time: %02d:%02d\n", day, month, year, hour, minute);
-    // Serial.printf("Heart Rate: %d bpm, SpO2: %.2f%%\n", heartRate, spo2);
-    // Serial.printf("Body Temp: %.2f°C, Room Temp: %.2f°C, Humidity: %.2f%%\n", 
-    //               body_temp, room_temp, room_humid);
+    Serial.println(buffer);
+    sscanf(buffer, "%02d/%02d/%04d;%02d:%02d;%d;%f;%f;%f;%f;%9[^;];%19[^;];%9[^;];%9[^;]",
+       &day, &month, &year, &hour, &minute, 
+       &heartRate, &spo2, &body_temp, &room_temp, &room_humid,
+       wifi_mode, wifi_ip, mqtt_status, sensor_status);
+    // Serial.println(String(wifi_mode) + " | " + String(wifi_ip) + " | " + String(mqtt_status) + " | " + String(sensor_status));
   }
 }
 
-
 void update_SensorValues() {
-  if (millis() - previousMillis >= 10000) {
+  if (millis() - previousMillis >= 5000) {
     previousMillis = millis();
 
     char date_buffer[11]; 
-    char time_buffer[6];  
+    char time_buffer[6];
+    buffer_hr = heartRate;  
 
     snprintf(date_buffer, sizeof(date_buffer), "%02d/%02d/%04d", day, month, year);
     snprintf(time_buffer, sizeof(time_buffer), "%02d:%02d", hour, minute);
@@ -127,7 +127,6 @@ void touchscreen_Startup(){
 
 void lvgl_Startup(){
   lv_init();
-  // lv_log_register_print_cb(log_print);
   lv_display_t * disp;
   draw_buf = new uint8_t[DRAW_BUF_SIZE];
   disp = lv_tft_espi_create(SCREEN_HEIGHT, SCREEN_WIDTH, draw_buf, DRAW_BUF_SIZE);
@@ -146,6 +145,9 @@ void setup() {
   touchscreen_Startup();
   lvgl_Startup();
   ui_init();
+  init_OLED();
+
+  xTaskCreatePinnedToCore(TaskOLED, "OLED Task", 4096, NULL, 1, &TaskOLEDHandle, 1);
 }
 
 void loop() {
@@ -156,4 +158,34 @@ void loop() {
   lastTick = millis();
   lv_timer_handler(); //--> Update the UI.
   delay(5);
+}
+
+void TaskOLED(void *pvParameters) {
+  lastStatus = millis();
+  strcpy(wifi_mode, "-");
+  strcpy(wifi_ip, "-");
+  strcpy(mqtt_status, "-");
+  strcpy(sensor_status, "-");
+
+
+  while (1) {
+    if((millis() - lastStatus >= 10000) && (displayMode == 0)){
+      clearScreen();
+      displayMode = 1;
+      lastECG = millis();
+    } else if ((millis() - lastECG >= 60000) && (displayMode == 1)){
+      clearScreen();
+      displayMode = 0;
+      lastStatus = millis();
+    }
+
+    if(displayMode == 1){
+      displayECG(buffer_hr);  // Update ECG display
+      vTaskDelay(pdMS_TO_TICKS(buffer_hr == 0 ? 150 : stepDelay));  // Delay 100ms
+    }
+    else if(displayMode == 0){
+      displayStatus(wifi_mode, wifi_ip, mqtt_status, sensor_status);
+      vTaskDelay(pdMS_TO_TICKS(150));  // Delay 100ms
+    }
+  }
 }
