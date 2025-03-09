@@ -7,12 +7,8 @@ import PatientInfoModel from "../../Models/PatientInfoModel";
 import SensorInfoModel from "../../Models/SensorInfoModel";
 import Repo from "../../Repositories";
 import { userData } from "../../Helper";
-import mqtt from "mqtt"; // Import MQTT.js
-
-
 
 export const Patient = () => {
-  const [ecgData, setEcgData] = useState<number[]>([]);
   const [patients, setPatients] = useState<PatientInfoModel[]>([]);
   const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
   const location = useLocation();
@@ -60,87 +56,6 @@ export const Patient = () => {
           if (intervalRef.current) clearInterval(intervalRef.current);
       };
   }, [patientId]); // Ensure it only runs when patientId changes
-
-  const mqttClientRef = useRef<mqtt.MqttClient | null>(null);
-  let messageCounter = 0;
-
-useEffect(() => {
-  if (!patientId || mqttClientRef.current) return;
-
-  const mqttBrokerUrl = "ws://localhost:9001";
-  const client = mqtt.connect(mqttBrokerUrl, {
-      clientId: `ecg-client-${Math.random().toString(16).slice(2, 10)}`,
-      clean: true,
-      reconnectPeriod: 1000,
-  });
-
-  mqttClientRef.current = client;
-
-  client.on("connect", () => console.log("MQTT Connected"));
-  client.on("error", (err) => console.error("MQTT Error:", err));
-
-  const topic = `ecg/patient/${patientId}`;
-
-  client.subscribe(topic, (err) => {
-      if (err) console.error("MQTT Subscription Error:", err);
-  });
-
-  const handleMessage = (receivedTopic: string, message: Buffer) => {
-      if (receivedTopic === topic) {
-          try {
-              const jsonMessage = JSON.parse(message.toString());
-              const ecgValue = jsonMessage.value;
-
-              if (typeof ecgValue === "number") {
-                  messageCounter++;
-                  if (messageCounter % 2 === 0) {
-                      setEcgData((prev) => [...prev.slice(-100), ecgValue]);
-                  }
-              }
-          } catch (err) {
-              console.error("Error parsing ECG JSON data:", err);
-          }
-      }
-  };
-
-  client.on("message", handleMessage);
-
-  return () => {
-      if (mqttClientRef.current) {
-          console.log(`Unsubscribing from ${topic}`);
-
-          mqttClientRef.current.removeListener("message", handleMessage);
-          mqttClientRef.current.unsubscribe(topic, () => {
-              console.log(`Unsubscribed from ${topic}`);
-          });
-
-          console.log("Disconnecting MQTT client...");
-          mqttClientRef.current.end(true, () => {
-              console.log("MQTT client fully disconnected");
-          });
-
-          mqttClientRef.current = null;
-      }
-  };
-}, [patientId]);
-  
-  
-  
-
-  
-
-  // useEffect(() => {
-  //   let t = 0; // Time step
-  //   const interval = setInterval(() => {
-  //     setEcgData((prev) => [
-  //       ...prev.slice(-99), // Keep the last 100 values
-  //       generateECGWaveform(t), // Use a function to generate ECG-like waves
-  //     ]);
-  //     t += 1;
-  //   }, 10); // Faster updates for a smoother look
-  
-  //   return () => clearInterval(interval);
-  // }, []);
 
   return (
     <Box sx={{ p: 4 }}>
