@@ -438,6 +438,7 @@ export interface ApiSensorDeviceSensorDevice
   attributes: {
     blood_oxy: Schema.Attribute.Decimal & Schema.Attribute.Required;
     body_temp: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    camera: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
