@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[pthm_dashboard_lvng.eez-project]:/userPages/2",
+    "selectedUserPageObject": "[pthm_dashboard_lvng.eez-project]:/userPages/0",
     "selectedActionObject": "[pthm_dashboard_lvng.eez-project]:/actions/0",
     "selectedBitmapObject": "[pthm_dashboard_lvng.eez-project]:/bitmaps/12",
     "subnavigationSelectedItems": {}
@@ -190,6 +190,7 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 40.967520940332975,
+              "selected": 2,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -1057,7 +1058,7 @@
       "transform": {
         "translate": {
           "x": -251.0642857142857,
-          "y": -180.20285714285708
+          "y": 19.797142857142944
         },
         "scale": 1.5
       },
