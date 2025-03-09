@@ -171,7 +171,7 @@ useEffect(() => {
         <Grid2 container spacing={4} justifyContent="center" alignItems="start">
           {/* ECG Card - Takes More Space */}
           <Grid2 size={{xs:12, md:8}}>
-            <ECGCard ecgData={ecgData} />
+            <ECGCard bpm={sensors[0]?.heart_rate} />
           </Grid2>
 
           {/* Patient Info Card - Takes Less Space */}
@@ -221,15 +221,17 @@ useEffect(() => {
                 width: "100%",
             }}
             >
-            {/* <img
-                src="http://192.168.215.202:3000/video_feed" // Replace with your actual stream URL
-                alt="Live Video Stream"
-                style={{
-                width: "100%",
-                borderRadius: "8px",
-                border: "2px solid #ddd", // Subtle border
-                }}
-            /> */}
+            { sensors[0]?.camera && (
+                <img
+                    src={sensors[0].camera} // Ensure it only renders when a valid URL exists
+                    alt="Live Video Stream"
+                    style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        border: "2px solid #ddd", // Subtle border
+                    }}
+                />
+            )}
             </Box>
         </Box>
       </Grid2>
