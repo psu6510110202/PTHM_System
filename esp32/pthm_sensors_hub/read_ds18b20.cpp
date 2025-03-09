@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "test_ds18b20.h"
+#include "read_ds18b20.h"
 
 OneWire oneWire(26);
 DallasTemperature sensors(&oneWire);

@@ -1,9 +1,14 @@
-// test_dht11.cpp
-#include "test_dht11.h"
+// read_dht11.cpp
+#include "read_dht11.h"
 
 DHT dht(DHTPIN, DHTTYPE);
+
 float room_temp;
 float room_humid;
+
+float buffer_temp;
+float buffer_humid;
+
 int dht11_status;
 
 void initDHT11() {
@@ -12,14 +17,16 @@ void initDHT11() {
 }
 
 void readDHT11() {
-    room_temp = dht.readTemperature();
-    room_humid = dht.readHumidity();
+    buffer_temp = dht.readTemperature();
+    buffer_humid = dht.readHumidity();
 
-    if (isnan(room_temp) || isnan(room_humid)) {
-        Serial.println("Failed to read from DHT11 sensor!");
-        dht11_status = false;
-        return;
+    if (isnan(buffer_temp) || isnan(buffer_humid)) {
+      // Serial.println("Failed to read from DHT11 sensor!");
+      dht11_status = false;
+      return;
     }
+    room_temp = buffer_temp;
+    room_humid = buffer_humid; 
     dht11_status = true;
 
     // Serial.print("Temperature: ");

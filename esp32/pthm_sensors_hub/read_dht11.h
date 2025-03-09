@@ -1,6 +1,6 @@
-// test_dht11.h
-#ifndef TEST_DHT11_H
-#define TEST_DHT11_H
+// read_dht11.h
+#ifndef READ_DHT11_H
+#define READ_DHT11_H
 
 #include <Arduino.h>
 #include <DHT.h>

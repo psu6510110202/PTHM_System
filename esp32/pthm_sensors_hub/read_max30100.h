@@ -1,5 +1,5 @@
-#ifndef TEST_MAX30100_H
-#define TEST_MAX30100_H
+#ifndef READ_MAX30100_H
+#define READ_MAX30100_H
 
 #include "MAX30100_PulseOximeter.h"
 

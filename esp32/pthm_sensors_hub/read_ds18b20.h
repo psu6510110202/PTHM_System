@@ -1,5 +1,5 @@
-#ifndef TEST_DS18B20_H
-#define TEST_DS18B20_H
+#ifndef READ_DS18B20_H
+#define READ_DS18B20_H
 
 extern float body_temp;
 extern int ds18b20_status;
