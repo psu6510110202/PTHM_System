@@ -5,15 +5,14 @@
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
-#include "test_ad8232.h"
-#include "test_ds18b20.h"
-#include "test_max30100.h"
-#include "test_dht11.h"
-#include "esp_task_wdt.h"
 #include <Wire.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <time.h>  // Include time.h for proper time struct handling
+#include <time.h>
+
+#include "read_ds18b20.h"
+#include "read_max30100.h"
+#include "read_dht11.h"
 
 // Task Handles
 TaskHandle_t TaskDS18B20;
