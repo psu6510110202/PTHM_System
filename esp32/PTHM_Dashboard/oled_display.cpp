@@ -103,4 +103,6 @@ void displayStatus(String mode, String ip, String mqtt, String sensor){
 
 void clearScreen(){
   oled.clearDisplay();
+  digitalWrite(BUZZER_PIN, LOW);
+  buzzerOn = false;
 }
