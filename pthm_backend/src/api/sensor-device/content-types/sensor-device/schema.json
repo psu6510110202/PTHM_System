@@ -42,6 +42,9 @@
     },
     "room_humidity": {
       "type": "decimal"
+    },
+    "camera": {
+      "type": "string"
     }
   }
 }

@@ -7,146 +7,55 @@ import PatientInfoModel from "../../Models/PatientInfoModel";
 import SensorInfoModel from "../../Models/SensorInfoModel";
 import Repo from "../../Repositories";
 import { userData } from "../../Helper";
-import mqtt from "mqtt"; // Import MQTT.js
-
-
 
 export const Patient = () => {
-  const [ecgData, setEcgData] = useState<number[]>([]);
   const [patients, setPatients] = useState<PatientInfoModel[]>([]);
   const [sensors, setSensors] = useState<SensorInfoModel[]>([]);
   const location = useLocation();
-  const patientId = location.state?.patientId; // Retrieve the patient ID from state
+  const patientId = location.state?.patientId;
   const user = userData();
-  
+
   const fetchPatients = async () => {
-    try {
-        const response = await Repo.PatientInfoRepository.getById(patientId ,user.jwt);
-        if(response){
-            setPatients([response]);
-        }
-    } catch (error) {
-        console.error("Error fetching patients:", error);
-        setPatients([]); // Set to empty array on failure
-    }
+      try {
+          const response = await Repo.PatientInfoRepository.getById(patientId, user.jwt);
+          if (response) {
+              setPatients([response]);
+          }
+      } catch (error) {
+          console.error("Error fetching patients:", error);
+          setPatients([]);
+      }
   };
 
   const fetchSensors = async () => {
-    try {
-        const response = await Repo.SensorRepository.getByPatientId(patientId ,user.jwt);
-        if(response){
-            setSensors([response]);
-        }
-    } catch (error) {
-        console.error("Error fetching patients:", error);
-        setPatients([]); // Set to empty array on failure
-    }
+      try {
+          const response = await Repo.SensorRepository.getByPatientId(patientId, user.jwt);
+          if (response) {
+              setSensors([response]);
+          }
+      } catch (error) {
+          console.error("Error fetching sensors:", error);
+          setSensors([]); // Corrected from setPatients([])
+      }
   };
 
-
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
-  
+
   useEffect(() => {
+      if (!patientId) return;
+      
       fetchPatients();
       fetchSensors();
+
       intervalRef.current = setInterval(() => {
           fetchPatients();
           fetchSensors();
-      }, 5000);
+      }, 10000);
 
       return () => {
           if (intervalRef.current) clearInterval(intervalRef.current);
       };
-  }, []);
-
-  const mqttClientRef = useRef<mqtt.MqttClient | null>(null);
-
-  useEffect(() => {
-    if (!patientId) return;
-  
-    // If the MQTT client already exists, subscribe only
-    if (!mqttClientRef.current) {
-      const mqttBrokerUrl = "ws://localhost:9001"; // Change to your broker
-      const client = mqtt.connect(mqttBrokerUrl, {
-        clientId: `ecg-client-${Math.random().toString(16).slice(2, 10)}`,
-        clean: true,
-        reconnectPeriod: 1000, // Adjust to prevent aggressive reconnections
-      });
-  
-      mqttClientRef.current = client;
-  
-      client.on("connect", () => {
-        console.log("MQTT Connected");
-      });
-  
-      client.on("error", (err) => {
-        console.error("MQTT Error:", err);
-      });
-    }
-  
-    const topic = `ecg/patient/${patientId}`;
-  
-    // Subscribe to the ECG topic
-    mqttClientRef.current.subscribe(topic, (err) => {
-      if (err) {
-        console.error("MQTT Subscription Error:", err);
-      }
-    });
-    
-    const handleMessage = (receivedTopic: string, message: Buffer) => {
-      if (receivedTopic === topic) {
-        try {
-          const jsonMessage = JSON.parse(message.toString());
-          const ecgValue = jsonMessage.value;
-  
-          if (typeof ecgValue === "number") {
-            // Only update state every 5 messages to reduce load
-            setEcgData((prev) => [...prev.slice(-125), ecgValue]);
-          }
-        } catch (err) {
-          console.error("Error parsing ECG JSON data:", err);
-        }
-      }
-    };
-  
-    mqttClientRef.current.on("message", handleMessage);
-  
-    return () => {
-      if (mqttClientRef.current) {
-        console.log(`Unsubscribing from ${topic}`);
-  
-        mqttClientRef.current.removeListener("message", handleMessage);
-        mqttClientRef.current.unsubscribe(topic, () => {
-          console.log(`Unsubscribed from ${topic}`);
-        });
-  
-        console.log("Disconnecting MQTT client...");
-        mqttClientRef.current.end(true, () => {
-          console.log("MQTT client fully disconnected");
-        });
-  
-        mqttClientRef.current = null;
-      }
-    };
-  }, [patientId]);
-  
-  
-  
-
-  
-
-  // useEffect(() => {
-  //   let t = 0; // Time step
-  //   const interval = setInterval(() => {
-  //     setEcgData((prev) => [
-  //       ...prev.slice(-99), // Keep the last 100 values
-  //       generateECGWaveform(t), // Use a function to generate ECG-like waves
-  //     ]);
-  //     t += 1;
-  //   }, 10); // Faster updates for a smoother look
-  
-  //   return () => clearInterval(interval);
-  // }, []);
+  }, [patientId]); // Ensure it only runs when patientId changes
 
   return (
     <Box sx={{ p: 4 }}>
@@ -177,7 +86,7 @@ export const Patient = () => {
         <Grid2 container spacing={4} justifyContent="center" alignItems="start">
           {/* ECG Card - Takes More Space */}
           <Grid2 size={{xs:12, md:8}}>
-            <ECGCard ecgData={ecgData} />
+            <ECGCard bpm={sensors[0]?.heart_rate} />
           </Grid2>
 
           {/* Patient Info Card - Takes Less Space */}
@@ -198,6 +107,49 @@ export const Patient = () => {
         </Grid2>
       </Box>
 
+      <Grid2 size={{ xs: 12 }}>
+        <Box
+            sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 4,
+            width: "100%",
+            }}
+        >
+            {/* Camera Stream Title */}
+            <Typography variant="h5" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
+            Live Patient Camera Stream
+            </Typography>
+
+            {/* Styled Camera Stream Box */}
+            <Box
+            sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#f9f9f9", // Light grey background
+                borderRadius: "12px",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Soft shadow
+                padding: 2,
+                maxWidth: "1000px",
+                width: "100%",
+            }}
+            >
+            { sensors[0]?.camera && (
+                <img
+                    src={sensors[0].camera} // Ensure it only renders when a valid URL exists
+                    alt="Live Video Stream"
+                    style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        border: "2px solid #ddd", // Subtle border
+                    }}
+                />
+            )}
+            </Box>
+        </Box>
+      </Grid2>
     </Box>
   );
 };

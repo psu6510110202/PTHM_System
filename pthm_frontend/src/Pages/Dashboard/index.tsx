@@ -77,11 +77,12 @@ export const Dashboard = () => {
         updatedAt: string // ISO timestamp format (e.g., "2025-02-08T14:46:58.705Z")
     ): string => {
     
-        // Calculate time difference in minutes
         const updatedAtTime = new Date(updatedAt).getTime();
-        const currentTime = new Date().getTime();
-        const timeDifferenceMinutes = (currentTime - updatedAtTime) / 60000; // Convert milliseconds to minutes
-    
+        const currentTime = new Date().getTime(); // This gets local time like Date.now()
+        const utcOffset = 7 * 60 * 60000; // UTC+7 offset in milliseconds
+        const updatedAtLocal = updatedAtTime + utcOffset;
+        const timeDifferenceMinutes = (currentTime - updatedAtLocal) / 60000; // Convert milliseconds to minutes
+
         // 🚨 If data is older than 2 minutes, mark as Critical
         if (timeDifferenceMinutes > 2) {
             return "Critical";
@@ -137,10 +138,13 @@ export const Dashboard = () => {
                 }
     
                 const updatedAtTime = new Date(sensorData.updatedAt).getTime();
-                const currentTime = new Date().getTime();
-                const timeDifferenceMinutes = (currentTime - updatedAtTime) / 60000;
-    
+                const currentTime = new Date().getTime(); // This gets local time like Date.now()
+                const utcOffset = 7 * 60 * 60000; // UTC+7 offset in milliseconds
+                const updatedAtLocal = updatedAtTime + utcOffset;
+                const timeDifferenceMinutes = (currentTime - updatedAtLocal) / 60000; // Convert milliseconds to minutes
+            
                 const isOffline = timeDifferenceMinutes > 2;
+                console.log(timeDifferenceMinutes + " | "+ isOffline)
     
                 const riskLevel = categorizeCase(
                     sensorData.heart_rate,

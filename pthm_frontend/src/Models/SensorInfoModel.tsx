@@ -6,4 +6,5 @@ export default interface SensorInfoModel {
     room_temp: number;
     room_humidity: number;
     updatedAt: Date;
+    camera: string;
 }
