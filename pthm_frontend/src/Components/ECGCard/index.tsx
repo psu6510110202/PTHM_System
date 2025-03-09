@@ -122,40 +122,48 @@ export const ECGCard: React.FC<ECGCardProps> = ({ bpm, windowSize = 500 }) => {
   // Animation function that updates display data
   useEffect(() => {
     if (ecgData.length === 0) return;
+  
+    let lastPauseTime = performance.now(); // Track the last pause time
+    const pauseDuration = 500; // 1 second
+    const updateInterval = 10000; // 9 seconds
     
     const updateDisplayData = () => {
-      const startIdx = positionRef.current;
-      // Create window of data points
-      let newData = [];
-      
-      for (let i = 0; i < windowSize; i++) {
-        // Ensure we wrap around to the beginning when we reach the end
-        const idx = (startIdx + i) % ecgData.length;
-        newData.push({
-          x: i,
-          y: ecgData[idx]
-        });
+      const now = performance.now();
+  
+      // If 9 seconds have passed since last pause, stop updates for 1 second
+      if (now - lastPauseTime >= updateInterval) {
+        lastPauseTime = now; // Reset pause time
+        setTimeout(() => {
+          animationRef.current = requestAnimationFrame(updateDisplayData);
+        }, pauseDuration);
+        return; // Skip this update to create a pause
       }
-      
+  
+      const startIdx = positionRef.current;
+      let newData = [];
+  
+      for (let i = 0; i < windowSize; i++) {
+        const idx = (startIdx + i) % ecgData.length;
+        newData.push({ x: i, y: ecgData[idx] });
+      }
+  
       setDisplayData(newData);
-      
+  
       // Move position forward for next frame (scrolling effect)
       positionRef.current = (positionRef.current + 3) % ecgData.length;
-      
+  
       // Continue animation
       animationRef.current = requestAnimationFrame(updateDisplayData);
     };
-    
-    // Start animation
+  
     animationRef.current = requestAnimationFrame(updateDisplayData);
-    
-    // Cleanup on unmount
+  
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [ecgData, windowSize]);
+  }, [ecgData, windowSize]);  
 
   const options: ApexOptions = {
     chart: {
